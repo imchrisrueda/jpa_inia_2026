@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CropShield AI - Defensor de Cultivos</title>
+    <!-- Fuentes premium de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Pantalla de Bienvenida / Activación de Audio -->
+    <div id="start-screen" class="overlay">
+        <div class="welcome-box">
+            <div class="logo-container">
+                <span class="logo-accent">CROP</span><span class="logo-main">SHIELD</span><span class="logo-ai">AI</span>
+            </div>
+            <p class="subtitle">Showcase Tecnológico de Agricultura de Precisión en Tiempo Real</p>
+            <div class="logos-institution">
+                <span class="inst-tag inia">INIA</span>
+                <span class="inst-separator">|</span>
+                <span class="inst-tag csic">CSIC</span>
+            </div>
+            <button id="btn-start" class="btn-primary">INICIAR SISTEMA DE DEFENSA</button>
+            <p class="disclaimer">Requiere acceso a la cámara web. Si no se detecta cámara física, se activará el simulador.</p>
+        </div>
+    </div>
+
+    <!-- HUD Principal de Cabina Dron / Robótica -->
+    <div class="hud-container">
+        <!-- Cabecera HUD -->
+        <header class="hud-header">
+            <div class="header-left">
+                <div class="logo-small">CROP<span>SHIELD</span></div>
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text">SISTEMA ONLINE</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="title-showcase">DEMOSTRADOR DE AGRICULTURA DE PRECISIÓN</div>
+            </div>
+
+            <div class="header-right">
+                <div class="time-display" id="time-display">00:00:00</div>
+                <div class="fps-display">FPS: <span id="val-fps">00</span></div>
+            </div>
+        </header>
+
+        <!-- Contenido HUD: Tres Columnas -->
+        <div class="hud-body">
+            <!-- Columna Izquierda: Estadísticas de Rendimiento Agrícola -->
+            <section class="hud-panel left-panel">
+                <h2 class="panel-title">MONITOR DE COSECHA</h2>
+                
+                <div class="score-card">
+                    <div class="card-label">PUNTUACIÓN TOTAL</div>
+                    <div class="card-value" id="score-val">0000</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box crop-box">
+                        <div class="stat-icon">🍎</div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="stats-crops">0</span>
+                            <span class="stat-label">Cultivos Seguros</span>
+                        </div>
+                    </div>
+                    <div class="stat-box weed-box">
+                        <div class="stat-icon">🌱</div>
+                        <div class="stat-content">
+                            <span class="stat-value" id="stats-weeds">0</span>
+                            <span class="stat-label">Dientes de León</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel de impacto ecológico -->
+                <div class="panel-section eco-section">
+                    <h3 class="section-title">IMPACTO ECOLÓGICO</h3>
+                    <div class="progress-container">
+                        <div class="progress-labels">
+                            <span>Ahorro de Pesticida</span>
+                            <span id="eco-saved-pct">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="eco-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div class="eco-metrics">
+                        <div class="eco-metric">
+                            <span class="metric-val" id="eco-liters">0.00 L</span>
+                            <span class="metric-label">Químicos Evitados</span>
+                        </div>
+                        <div class="eco-metric">
+                            <span class="metric-val" id="eco-efficiency">0.0%</span>
+                            <span class="metric-label">Precisión de Disparo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consola del sistema -->
+                <div class="panel-section console-section">
+                    <h3 class="section-title">CONSOLA LÁSER</h3>
+                    <div class="log-container" id="log-console">
+                        <div class="log-entry system">[SYSTEM] Esperando activación...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Columna Central: Viewport de Cámara / Láser -->
+            <main class="viewport-panel">
+                <!-- Marco táctico del visor -->
+                <div class="tactical-frame">
+                    <div class="corner tl"></div>
+                    <div class="corner tr"></div>
+                    <div class="corner bl"></div>
+                    <div class="corner br"></div>
+                    
+                    <!-- Mira central para el modo auto-disparo -->
+                    <div class="center-crosshair" id="auto-crosshair">
+                        <div class="crosshair-ring"></div>
+                        <div class="crosshair-dot"></div>
+                        <div class="lock-timer" id="lock-timer" style="width: 0%;"></div>
+                    </div>
+
+                    <!-- Canvas Principal para renderizar frames y cajas de YOLO -->
+                    <canvas id="canvas-stream" width="640" height="480"></canvas>
+                </div>
+            </main>
+
+            <!-- Columna Derecha: Panel de Configuración -->
+            <section class="hud-panel right-panel">
+                <h2 class="panel-title">CONTROL TÁCTICO</h2>
+
+                <!-- Selector de Modo de Disparo -->
+                <div class="control-group">
+                    <label class="control-label">MODO DE INTERACCIÓN</label>
+                    <div class="toggle-container">
+                        <button id="btn-mode-mouse" class="toggle-btn active">RATÓN</button>
+                        <button id="btn-mode-auto" class="toggle-btn">AUTO-DISPARO</button>
+                    </div>
+                    <p class="group-desc" id="desc-mode">Haz clic directamente sobre los dientes de león en el visor para destruirlos.</p>
+                </div>
+
+                <!-- Selector de Cámara (Cámara Web vs Simulación) -->
+                <div class="control-group">
+                    <label class="control-label">FUENTE DE VÍDEO</label>
+                    <div class="toggle-container">
+                        <button id="btn-feed-camera" class="toggle-btn active">CÁMARA REAL</button>
+                        <button id="btn-feed-sim" class="toggle-btn">SIMULACIÓN</button>
+                    </div>
+                </div>
+
+                <!-- Ajuste de Umbral de Confianza YOLO -->
+                <div class="control-group">
+                    <div class="slider-header">
+                        <label class="control-label">UMBRAL DE CONFIANZA IA</label>
+                        <span class="slider-value" id="val-conf">35%</span>
+                    </div>
+                    <input type="range" id="slider-conf" min="15" max="85" value="35" class="slider">
+                    <p class="group-desc">Ajusta la sensibilidad del modelo YOLOv8 para evitar falsos positivos.</p>
+                </div>
+
+                <!-- Hardware Status -->
+                <div class="panel-section hardware-section">
+                    <h3 class="section-title">HARDWARE STATUS</h3>
+                    <ul class="hw-list">
+                        <li>
+                            <span class="hw-label">Aceleración GPU:</span>
+                            <span class="hw-value" id="hw-gpu">Detectando...</span>
+                        </li>
+                        <li>
+                            <span class="hw-label">Dispositivo:</span>
+                            <span class="hw-value truncate" id="hw-gpu-name">-</span>
+                        </li>
+                        <li>
+                            <span class="hw-label">Entrada Cámara:</span>
+                            <span class="hw-value" id="hw-cam">Procesando...</span>
+                        </li>
+                        <li>
+                            <span class="hw-label">Latencia Inferencia:</span>
+                            <span class="hw-value" id="hw-latency">< 4 ms</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="action-buttons">
+                    <button id="btn-calibration" class="btn-secondary">CALIBRAR ENTORNO</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Pie de página corporativo -->
+        <footer class="hud-footer">
+            <div class="footer-left">INIA - Instituto Nacional de Investigación y Tecnología Agraria y Alimentaria</div>
+            <div class="footer-right">CSIC - Consejo Superior de Investigaciones Científicas</div>
+        </footer>
+    </div>
+    
+    <!-- Scripts del Motor de Juego y HUD -->
+    <script src="/static/particles.js"></script>
+    <script src="/static/game.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
