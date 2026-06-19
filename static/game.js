@@ -122,7 +122,7 @@ class CropShieldGame {
             const cx = (hitBox.box[0] + hitBox.box[2]) / 2;
             const cy = (hitBox.box[1] + hitBox.box[3]) / 2;
             
-            if (hitClass === 'diente_de_leon') {
+            if (hitClass === 'maleza') {
                 // Éxito: maleza eliminada
                 this.score += 100;
                 this.weedsDestroyed++;
@@ -132,7 +132,7 @@ class CropShieldGame {
                 // Emitir partículas verdes
                 particles.emit(cx, cy, '#00ff88', 30);
                 
-                this.logToConsole(`[HIT] Diente de león neutralizado (+100 PTS) en (${cx.toFixed(0)}, ${cy.toFixed(0)})`, 'success');
+                this.logToConsole(`[HIT] Maleza (Banana) neutralizada (+100 PTS) en (${cx.toFixed(0)}, ${cy.toFixed(0)})`, 'success');
             } else if (hitClass === 'manzana') {
                 // Error: daño colateral
                 this.score = Math.max(0, this.score - 150);
@@ -166,11 +166,10 @@ class CropShieldGame {
     // Actualiza la interfaz del usuario
     updateHUD() {
         document.getElementById('score-val').innerText = String(this.score).padStart(4, '0');
-        document.getElementById('stats-crops').innerText = this.cropsSafe;
-        document.getElementById('stats-weeds').innerText = this.weedsDestroyed;
+        // Los contadores del visor (stats-crops y stats-weeds) se actualizan en tiempo real desde app.js para reflejar el frame actual.
         
         // Ahorro ecológico estimado
-        // Cada diente de león destruido ahorra aprox 0.25 litros de herbicida tradicional
+        // Cada maleza destruida ahorra aprox 0.25 litros de herbicida tradicional
         const litersSaved = this.weedsDestroyed * 0.25;
         document.getElementById('eco-liters').innerText = `${litersSaved.toFixed(2)} L`;
         
@@ -205,82 +204,118 @@ class CropShieldGame {
         const dt = now - this.lastUpdateTime;
         this.lastUpdateTime = now;
 
+        const crosshairEl = document.getElementById('auto-crosshair');
+        const lockTimerEl = document.getElementById('lock-timer');
+
         if (this.interactionMode !== 'auto') {
-            document.getElementById('auto-crosshair').classList.remove('active');
-            document.getElementById('lock-timer').style.clipPath = 'polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)';
+            if (crosshairEl) {
+                crosshairEl.classList.remove('active');
+                crosshairEl.style.left = '50%';
+                crosshairEl.style.top = '50%';
+            }
+            if (lockTimerEl) {
+                lockTimerEl.style.clipPath = 'polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)';
+            }
+            this.lockTarget = null;
+            this.lockDuration = 0;
             return;
         }
 
-        const centerRadius = 60; // Área de la mira central (120px ancho/2)
-        const cx = canvasWidth / 2;
-        const cy = canvasHeight / 2;
-
+        // Buscar malezas en las detecciones
+        const weeds = detections.filter(det => det.class === 'maleza');
         let targetFound = null;
 
-        // Buscar si hay algún diente de león dentro de la mira central
-        for (const det of detections) {
-            if (det.class !== 'diente_de_leon') continue;
-            
-            const [x1, y1, x2, y2] = det.box;
-            const detCx = (x1 + x2) / 2;
-            const detCy = (y1 + y2) / 2;
-            
-            // Distancia euclídea al centro
-            const dist = Math.hypot(detCx - cx, detCy - cy);
-            if (dist < centerRadius) {
-                targetFound = det;
-                break;
-            }
-        }
+        if (weeds.length > 0) {
+            // Si ya tenemos un lockTarget, intentamos buscar el mismo en las nuevas detecciones por cercanía
+            if (this.lockTarget) {
+                const prevCx = (this.lockTarget.box[0] + this.lockTarget.box[2]) / 2;
+                const prevCy = (this.lockTarget.box[1] + this.lockTarget.box[3]) / 2;
 
-        if (targetFound) {
-            document.getElementById('auto-crosshair').classList.add('active');
-            
-            // Si es la primera fijación o el objetivo cambió
-            if (!this.lockTarget || this.lockTarget.box.join(',') !== targetFound.box.join(',')) {
+                let minDistance = Infinity;
+                let closestWeed = null;
+
+                for (const weed of weeds) {
+                    const weedCx = (weed.box[0] + weed.box[2]) / 2;
+                    const weedCy = (weed.box[1] + weed.box[3]) / 2;
+                    const distance = Math.hypot(weedCx - prevCx, weedCy - prevCy);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestWeed = weed;
+                    }
+                }
+
+                // Si está a menos de 100px (umbral razonable de tracking), mantenemos la fijación
+                if (minDistance < 100) {
+                    targetFound = closestWeed;
+                }
+            }
+
+            // Si no hay target fijado o se perdió el anterior, fijamos la primera maleza disponible
+            if (!targetFound) {
+                targetFound = weeds[0];
                 this.lockTarget = targetFound;
                 this.lockDuration = 0;
             } else {
+                // Si es el mismo objetivo de tracking, acumulamos tiempo y actualizamos sus datos
+                this.lockTarget = targetFound;
                 this.lockDuration += dt;
-                
-                // Actualizar la animación del anillo del temporizador
-                const progress = Math.min(1.0, this.lockDuration / this.lockRequiredTime);
-                const angle = progress * 360;
-                
-                // Simulación visual de barra circular usando clip-path
-                let clipPathVal = 'polygon(50% 50%, 50% 0%';
-                if (angle >= 45) clipPathVal += ', 100% 0%';
-                if (angle >= 135) clipPathVal += ', 100% 100%';
-                if (angle >= 225) clipPathVal += ', 0% 100%';
-                if (angle >= 315) clipPathVal += ', 0% 0%';
-                
-                // Coordenadas trigonométricas para el final del arco
-                const rad = (angle - 90) * (Math.PI / 180);
-                const rx = 50 + 50 * Math.cos(rad);
-                const ry = 50 + 50 * Math.sin(rad);
-                clipPathVal += `, ${rx}% ${ry}%)`;
-                
-                document.getElementById('lock-timer').style.clipPath = clipPathVal;
-
-                if (this.lockDuration >= this.lockRequiredTime) {
-                    // Disparar láser automáticamente
-                    const tCx = (targetFound.box[0] + targetFound.box[2]) / 2;
-                    const tCy = (targetFound.box[1] + targetFound.box[3]) / 2;
-                    
-                    // El láser sale desde la parte superior (simulando dron/pulverizador)
-                    this.fireLaser(cx, 0, tCx, tCy, detections, particles);
-                    
-                    // Reiniciar fijación tras disparo para evitar bucles continuos
-                    this.lockTarget = null;
-                    this.lockDuration = 0;
-                }
             }
         } else {
-            // No hay objetivos en la mira
+            // No hay malezas en pantalla
             this.lockTarget = null;
             this.lockDuration = 0;
-            document.getElementById('auto-crosshair').classList.remove('active');
-            document.getElementById('lock-timer').style.clipPath = 'polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)';
+        }
+
+        // Renderizado del HUD de auto-disparo
+        if (this.lockTarget) {
+            const tCx = (this.lockTarget.box[0] + this.lockTarget.box[2]) / 2;
+            const tCy = (this.lockTarget.box[1] + this.lockTarget.box[3]) / 2;
+
+            if (crosshairEl) {
+                crosshairEl.classList.add('active');
+                // Posicionar la mira en coordenadas porcentuales respecto a la resolución lógica (640x480)
+                crosshairEl.style.left = `${(tCx / 640) * 100}%`;
+                crosshairEl.style.top = `${(tCy / 480) * 100}%`;
+            }
+
+            // Actualizar la animación del anillo del temporizador
+            const progress = Math.min(1.0, this.lockDuration / this.lockRequiredTime);
+            const angle = progress * 360;
+
+            let clipPathVal = 'polygon(50% 50%, 50% 0%';
+            if (angle >= 45) clipPathVal += ', 100% 0%';
+            if (angle >= 135) clipPathVal += ', 100% 100%';
+            if (angle >= 225) clipPathVal += ', 0% 100%';
+            if (angle >= 315) clipPathVal += ', 0% 0%';
+
+            const rad = (angle - 90) * (Math.PI / 180);
+            const rx = 50 + 50 * Math.cos(rad);
+            const ry = 50 + 50 * Math.sin(rad);
+            clipPathVal += `, ${rx}% ${ry}%)`;
+
+            if (lockTimerEl) {
+                lockTimerEl.style.clipPath = clipPathVal;
+            }
+
+            // Ejecutar disparo al cumplir el tiempo
+            if (this.lockDuration >= this.lockRequiredTime) {
+                // El disparo sale del centro superior (320, 0) y va hacia (tCx, tCy)
+                this.fireLaser(320, 0, tCx, tCy, detections, particles);
+                
+                // Reiniciar el lock para el siguiente ciclo
+                this.lockTarget = null;
+                this.lockDuration = 0;
+            }
+        } else {
+            // Sin objetivo fijado, restablecer mira al centro y desactivar indicador
+            if (crosshairEl) {
+                crosshairEl.classList.remove('active');
+                crosshairEl.style.left = '50%';
+                crosshairEl.style.top = '50%';
+            }
+            if (lockTimerEl) {
+                lockTimerEl.style.clipPath = 'polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%)';
+            }
         }
     }
 }

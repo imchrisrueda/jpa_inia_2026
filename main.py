@@ -14,6 +14,14 @@ os.makedirs("static/assets", exist_ok=True)
 
 app = FastAPI(title="CropShield AI Backend")
 
+@app.middleware("http")
+async def add_no_cache_header(request, call_next):
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # Iniciar componentes globales
 camera = VideoCamera(source=0)
 detector = CropShieldModel()
@@ -103,7 +111,7 @@ async def websocket_endpoint(websocket: WebSocket):
                             camera.sim_dandelion_x + 22,
                             camera.sim_dandelion_y + 22
                         ],
-                        "class": "diente_de_leon",
+                        "class": "maleza",
                         "confidence": 0.95
                     }
                 ]

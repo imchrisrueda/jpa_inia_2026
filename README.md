@@ -9,14 +9,14 @@ Este proyecto es una demostración interactiva en tiempo real para todos los pú
 1. **Detección Visual en Tiempo Real**: Inferencia a alta velocidad (>30 FPS) utilizando **YOLOv8 Nano** acelerado por GPU (Nvidia CUDA).
 2. **Cultivo y Maleza específicos**:
    * **Cultivo seguro**: Manzana roja real.
-   * **Amenaza/Maleza**: Hojas impresas de Diente de León.
+   * **Amenaza/Maleza**: Banana o plantas de prueba.
 3. **HUD Tecnológico Futurista**: Interfaz premium de cabina de dron/robótica en HTML5 y CSS con la paleta de colores oficial de la institución (**INIA-CSIC**).
 4. **Doble modo de interacción**:
    * **Modo Manual (Ratón)**: Apuntar y hacer clic directamente sobre los objetivos de malezas en el visor.
-   * **Modo Autónomo (Auto-disparo)**: Alínea la mira central sobre la maleza durante 1 segundo para que el software dispare automáticamente.
+   * **Modo Autónomo (Auto-disparo)**: El sistema realiza un seguimiento físico y móvil de la maleza en la pantalla, fijando el objetivo durante 1 segundo para dispararle automáticamente en su posición exacta.
 5. **Simulación de Campo Incorporada**: Si no hay una cámara web física conectada, o si se activa el modo de prueba, el sistema genera un flujo gráfico interactivo simulado con un cultivo y maleza en movimiento para probar todas las mecánicas láser y el HUD sin periféricos externos.
 6. **Efectos de Partículas y Sonido**: Renderizado dinámico de chispas láser y síntesis de audio retro-arcade en tiempo real mediante la **Web Audio API** (sin dependencias de archivos externos).
-7. **Pipeline de Entrenamiento Local**: Permite a los visitantes o al expositor capturar fotos con la cámara web de sus propias manzanas y dientes de león y entrenar un modelo YOLOv8 propio en directo (tarda menos de 1 minuto en la GPU dedicada RTX 4070Ti).
+7. **Pipeline de Entrenamiento Local**: Permite a los visitantes o al expositor capturar fotos con la cámara web de sus propias manzanas y bananas (maleza) y entrenar un modelo YOLOv8 propio en directo (tarda menos de 1 minuto en la GPU dedicada RTX 4070Ti).
 
 ---
 
@@ -41,6 +41,7 @@ JPA2026/
 ├── README.md               # Este archivo de documentación general
 ├── INSTALL.md              # Guía de instalación y configuración
 ├── USER_GUIDE.md           # Guía de uso y calibración para el expositor
+├── CHANGELOG.md            # Historial de cambios funcionales
 └── AGENTS.md               # Convenciones y reglas de desarrollo
 ```
 

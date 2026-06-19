@@ -23,29 +23,30 @@ graph TD
 ## Componentes
 
 ### 1. Servidor Backend (Python)
-* **API y Servidor WebSocket**: Implementado con **FastAPI** y **Uvicorn**. Gestiona la conexión en tiempo real con el navegador.
+* **API y Servidor WebSocket**: Implementado con **FastAPI** y **Uvicorn**. Gestiona la conexión en tiempo real con el navegador. Incorpora un middleware HTTP para la prevención estricta de caché (`no-cache, no-store, must-revalidate`) que garantiza que los cambios del frontend se carguen sin interferencia de memorias intermedias.
 * **Captura de Vídeo**: Procesamiento del flujo de la webcam frame a frame mediante **OpenCV** en un hilo separado para evitar bloqueos.
-* **Inferencia de IA**: Librería `ultralytics` para cargar y ejecutar **YOLOv8 Nano** (`yolov8n.pt` o modelo ajustado `best.pt`). Si CUDA está disponible, se transfiere automáticamente el modelo a la GPU.
-* **Script de Entrenamiento/Ajuste**: Módulo independiente (`train.py`) para capturar fotos con la webcam, organizarlas en carpetas de entrenamiento/validación y realizar transfer learning con YOLOv8 sobre las clases `manzana` (cultivo) y `diente_de_leon` (amenaza).
+* **Inferencia de IA**: Librería `ultralytics` para cargar y ejecutar **YOLOv8 Nano** (`yolov8n.pt` o modelo ajustado `best.pt`). Si CUDA está disponible, se transfiere automáticamente el modelo a la GPU. Mapea la clase de plagas (ya sean dandelions o plátanos de COCO) a un identificador unificado de `'maleza'` enviado al cliente.
+* **Script de Entrenamiento/Ajuste**: Módulo independiente (`train.py`) para capturar fotos con la webcam, organizarlas en carpetas de entrenamiento/validación y realizar transfer learning con YOLOv8 sobre las clases `manzana` (cultivo) y `maleza` (amenaza).
 
 ### 2. Cliente Frontend (Web SPA)
 * **HTML5 Canvas / DOM Overlays**: Renderizado del flujo de vídeo y superposición del HUD futurista (retículas, líneas de escaneo y cajas de detección).
 * **Sistema de Estilos (CSS)**: Sistema basado en variables CSS con la paleta de colores del INIA-CSIC y efectos de brillo neón (box-shadow, text-shadow).
 * **Motor del Juego (JavaScript)**:
   * Control del ciclo de juego (Game Loop) a 60 FPS mediante `requestAnimationFrame`.
-  * Detección de colisiones (comprobar si el clic del ratón o la mira de auto-disparo coincide con el bounding box del diente de león).
+  * Detección de colisiones (comprobar si el clic del ratón o la mira de auto-disparo coincide con el bounding box de la maleza).
+  * Auto-disparo dinámico guiado: algoritmo de tracking por proximidad espacial (distancia euclídea <100px) entre frames para desplazar la mira `#auto-crosshair` y fijar el objetivo durante 1 segundo antes de emitir la orden de disparo.
   * Gestor de audio (Web Audio API) para efectos de sonido (láser, aciertos, errores).
   * Gestor de partículas para efectos visuales del rayo láser e impacto.
 
 ## Flujo de datos
 1. El backend captura un frame de la cámara web.
-2. Si el cliente está conectado por WebSocket, el backend redimensiona el frame a 640x480 (o mantiene la resolución nativa) y lo pasa por el modelo YOLOv8.
+2. Si el cliente está conectado por WebSocket, el backend redimensiona el frame a 640x480 y lo pasa por el modelo YOLOv8.
 3. El backend codifica el frame en JPEG y lo convierte a Base64.
 4. El backend envía al frontend un mensaje JSON por el WebSocket que contiene:
    * El frame de vídeo en Base64.
-   * La lista de detecciones: `[{"box": [x1, y1, x2, y2], "class": "manzana/diente_de_leon", "confidence": 0.92}, ...]`
+   * La lista de detecciones: `[{"box": [x1, y1, x2, y2], "class": "manzana/maleza", "confidence": 0.92}, ...]`
 5. El frontend decodifica el frame, lo pinta en el canvas y superpone las retículas HUD correspondientes.
-6. El frontend procesa las acciones del usuario (clics en pantalla o auto-disparo al centrar un objetivo).
+6. El frontend procesa las acciones del usuario (clics en pantalla o auto-disparo guiado sobre la maleza fijada).
 
 ## Modelo de datos
 El flujo de datos por WebSocket utiliza el siguiente esquema JSON simplificado:
@@ -61,7 +62,7 @@ El flujo de datos por WebSocket utiliza el siguiente esquema JSON simplificado:
     },
     {
       "box": [400, 200, 480, 280],
-      "class": "diente_de_leon",
+      "class": "maleza",
       "confidence": 0.89
     }
   ]
@@ -71,7 +72,7 @@ El flujo de datos por WebSocket utiliza el siguiente esquema JSON simplificado:
 ## Interfaces
 * **Fondo HUD**: Oscuro profundo (`#0d0e12`).
 * **Marcos y Textos**: Gris CSIC (`#A2AAAD`) y Blanco (`#ffffff`).
-* **Láser y Alertas (Diente de León)**: Rojo CSIC (`#AF071F`) con brillo de alta intensidad.
+* **Láser y Alertas (Maleza)**: Rojo CSIC (`#AF071F`) con brillo de alta intensidad.
 * **Detección Segura (Manzanas)**: Verde neón digital (`#00ff88`).
 
 ## Dependencias
@@ -98,6 +99,7 @@ El flujo de datos por WebSocket utiliza el siguiente esquema JSON simplificado:
 * `README.md`: Resumen general.
 * `INSTALL.md`: Instrucciones paso a paso usando PowerShell y `uv`.
 * `USER_GUIDE.md`: Guía para el expositor del showcase para calibrar y operar la demo.
+* `CHANGELOG.md`: Registro formal de versiones y cambios funcionales.
 
 ## Despliegue
 * Aplicación de ejecución local. El expositor ejecuta un script de inicio de PowerShell (`run.ps1`) que activa el entorno virtual y arranca el servidor. El navegador web se abre automáticamente.

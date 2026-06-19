@@ -1,7 +1,7 @@
 # CropShield AI: Defensor de Cultivos
 
 ## Resumen
-Una aplicación interactiva de estilo arcade HUD (Heads-Up Display) de agricultura de precisión, diseñada para un showcase para todas las edades. Utiliza una cámara web para detectar cultivos y dientes de león en tiempo real y permite "destruir" los dientes de león mediante un láser virtual, demostrando de forma visual y lúdica cómo la Inteligencia Artificial reduce el uso de pesticidas.
+Una aplicación interactiva de estilo arcade HUD (Heads-Up Display) de agricultura de precisión, diseñada para un showcase para todas las edades. Utiliza una cámara web para detectar cultivos y malezas (bananas) en tiempo real y permite "destruir" las malezas mediante un láser virtual, demostrando de forma visual y lúdica cómo la Inteligencia Artificial reduce el uso de pesticidas.
 
 ## Problema
 En la agricultura tradicional, la fumigación de herbicidas se realiza de manera indiscriminada sobre todo el campo, lo que incrementa los costes, contamina el suelo y afecta a cultivos sanos. Aunque existen tecnologías de agricultura de precisión basadas en Deep Learning para fumigación dirigida, el público general no comprende de manera fácil e interactiva cómo funcionan estos modelos visuales de IA en tiempo real.
@@ -16,21 +16,21 @@ Las explicaciones sobre IA en agricultura suelen ser teóricas o en formato víd
 ## Resultado esperado
 Una aplicación web interactiva que:
 1. Capture el flujo de vídeo de una cámara web en tiempo real.
-2. Identifique mediante Deep Learning la diferencia entre "cultivos" (Manzana Roja Real) y "amenazas" (Imágenes impresas de Diente de León).
+2. Identifique mediante Deep Learning la diferencia entre "cultivos" (Manzana Roja Real) y "maleza" (Banana o imágenes de malezas).
 3. Superponga un HUD interactivo de estilo tecnológico futurista con la paleta de colores del INIA-CSIC.
-4. Permita a los usuarios apuntar y "eliminar" virtualmente los dientes de león con un rayo láser/pulverización al hacer clic (ratón) o mediante fijación automática (auto-disparo).
+4. Permita a los usuarios apuntar y "eliminar" virtualmente las malezas con un rayo láser/pulverización al hacer clic (ratón) o mediante fijación automática (auto-disparo).
 
 ## Entregables
 1. **Backend (Python)**: Detección rápida (YOLOv8 Nano) optimizada para GPU (CUDA) y transmisión por WebSockets.
 2. **Frontend (Web - HTML/CSS/JS)**: Interfaz HUD futurista de alta fidelidad con efectos visuales, sonido y marcador.
-3. **Script de Entrenamiento/Ajuste**: Script automatizado en Python para capturar imágenes con la webcam y entrenar/ajustar un modelo YOLOv8 propio para "Manzana" y "Diente de León".
-4. **Set de Tarjetas Imprimibles**: Plantilla digital con ilustraciones de dientes de león para demostraciones de respaldo.
+3. **Script de Entrenamiento/Ajuste**: Script automatizado en Python para capturar imágenes con la webcam y entrenar/ajustar un modelo YOLOv8 propio para "Manzana" y "Maleza".
+4. **Set de Tarjetas Imprimibles**: Plantilla digital con ilustraciones de malezas para demostraciones de respaldo.
 5. **Documentación**: Guías de instalación (`INSTALL.md`) y uso rápido (`USER_GUIDE.md`).
 
 ## Evidencias de éxito
 * La cámara web funciona a >30 FPS con el modelo de Deep Learning en ejecución gracias a la GPU RTX 4070Ti.
 * Un usuario puede alternar entre el modo de selección (Ratón vs Auto-disparo).
-* El láser elimina el diente de león virtualmente actualizando el marcador e impacto ecológico.
+* El láser elimina la maleza virtualmente actualizando el marcador e impacto ecológico.
 
 ## Métricas
 * **Tasa de fotogramas**: Mínimo 30 FPS en el ordenador (RTX 4070Ti).
@@ -38,7 +38,7 @@ Una aplicación web interactiva que:
 * **Tiempo de respuesta**: Latencia del láser <50ms tras el disparo.
 
 ## Alcance
-* Detección en tiempo real de: `Cultivo` (Manzana Roja Real) y `Maleza/Plaga` (Imágenes impresas de Diente de León).
+* Detección en tiempo real de: `Cultivo` (Manzana Roja Real) y `Maleza/Plaga` (Banana o imágenes de malezas).
 * Modos de interacción: Modo Ratón (apuntar y hacer clic) y Modo Auto-disparo (fijar blanco por 1 segundo).
 * Estética de interfaz inspirada en la paleta corporativa del INIA-CSIC (Rojo CSIC #AF071F y Gris #A2AAAD).
 
@@ -47,7 +47,7 @@ Una aplicación web interactiva que:
 * Leaderboard persistente en base de datos externa.
 
 ## Datos
-* **Dataset de origen**: Modelo YOLOv8 pre-entrenado + dataset de ajuste para "manzana" y "diente de león".
+* **Dataset de origen**: Modelo YOLOv8 pre-entrenado + dataset de ajuste para "manzana" y "maleza".
 * **Entradas**: Flujo RGB desde la cámara web (USB o integrada).
 * **Salidas**: Clases y coordenadas de bounding boxes mediante WebSockets.
 
@@ -65,7 +65,7 @@ Una aplicación web interactiva que:
 * **Usuario/Expositor**: Valida que el flujo de uso sea entretenido, rápido de configurar y visualmente impactante.
 
 ## Decisiones tomadas
-* **Objetos**: Se utilizará una **manzana roja real** como cultivo principal. Como maleza/plaga, se usarán **imágenes impresas de dientes de león**.
+* **Objetos**: Se utilizará una **manzana roja real** como cultivo principal. Como maleza/plaga, se usará una **banana real** o imágenes impresas de malezas.
 * **Interacción**: Doble modo (Ratón y Auto-disparo) seleccionable mediante un control en el HUD.
 * **Estética**: Diseño tecnológico futurista con paleta del INIA-CSIC (Rojo #AF071F, Gris #A2AAAD y acentos cian/verde neon para contraste digital).
 * **Entorno**: Python virtual environment (`venv`) gestionado con `uv`.

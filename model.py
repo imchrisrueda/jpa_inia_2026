@@ -51,17 +51,21 @@ class CropShieldModel:
                 if "manzana" in class_name or "apple" in class_name:
                     mapped_class = "manzana"
                 elif "diente" in class_name or "dandelion" in class_name or "maleza" in class_name:
-                    mapped_class = "diente_de_leon"
+                    mapped_class = "maleza"
                 else:
                     mapped_class = class_name
             else:
                 # Modelo base COCO
                 # COCO clase 47 = 'apple' (manzana)
-                # COCO clase 58 = 'potted plant' (planta de maceta, que simula diente de león/maleza)
+                # COCO clases que mapeamos como Maleza/Amenaza:
+                # 58 = 'potted plant' (planta de maceta)
+                # 46 = 'banana' (plátano)
+                # 50 = 'broccoli' (brócoli)
+                # 49 = 'orange' (naranja)
                 if cls_id == 47:
                     mapped_class = "manzana"
-                elif cls_id == 58:
-                    mapped_class = "diente_de_leon"
+                elif cls_id in [58, 46, 50, 49]:
+                    mapped_class = "maleza"
                 else:
                     # Omitir cualquier otra clase COCO en el showcase
                     continue

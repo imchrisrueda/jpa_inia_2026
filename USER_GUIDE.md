@@ -9,15 +9,15 @@ Esta guía está dirigida a la persona encargada de operar y calibrar la demostr
 Para lograr una demostración fluida y con excelente precisión de detección, sigue estas recomendaciones:
 
 1. **Montaje de la Cámara**: Coloca la cámara web montada en un soporte vertical (tipo trípode de mesa o brazo articulado) apuntando directamente hacia abajo (plano cenital) sobre una superficie plana (mesa de demostración).
-2. **Fondo de Contraste**: Coloca un tapete o cartulina de color neutro (preferiblemente oscuro, gris mate o marrón) sobre la mesa. Esto ayudará a que la manzana y las tarjetas impresas de diente de león resalten claramente.
-3. **Iluminación**: Intenta que la mesa esté bien iluminada de forma homogénea. Evita sombras duras (por ejemplo, proyectadas por el soporte de la cámara o tu propia mano) y reflejos excesivos de focos directos sobre la manzana o el papel de las tarjetas.
+2. **Fondo de Contraste**: Coloca un tapete o cartulina de color neutro (preferiblemente oscuro, gris mate o marrón) sobre la mesa. Esto ayudará a que la manzana y las bananas (maleza) resalten claramente.
+3. **Iluminación**: Intenta que la mesa esté bien iluminada de forma homogénea. Evita sombras duras (por ejemplo, proyectadas por el soporte de la cámara o tu propia mano) y reflejos excesivos de focos directos sobre la manzana o la fruta de prueba.
 
 ---
 
 ## 2. Preparación de los Elementos de Demostración
 
 * **El Cultivo (Seguro)**: Utiliza una o varias **manzanas rojas reales**. Es recomendable que sean manzanas limpias, de color rojo uniforme y sin brillos excesivos por cera.
-* **La Amenaza (Objetivo Láser)**: Imprime las tarjetas ilustrativas de **diente de león** en papel blanco mate (evita papel fotográfico brillante que cause reflejos). Puedes dibujar o imprimir varias copias para distribuirlas en la mesa de demostración.
+* **La Amenaza (Objetivo Láser)**: Utiliza una **banana** como objeto de prueba para representar la maleza. Su forma y color son fácilmente distinguibles por el detector.
 
 ---
 
@@ -28,7 +28,7 @@ Para lograr una demostración fluida y con excelente precisión de detección, s
 3. **Ajuste del Umbral (IA Confidence)**:
    * En la barra lateral derecha, ajusta el deslizador de **"UMBRAL DE CONFIANZA IA"** (por defecto 35%).
    * Si ves falsas detecciones en la mesa (cuadros de detección que parpadean en el vacío), sube el umbral hacia 45%-50%.
-   * Si colocas un diente de león impreso y no se dibuja la retícula roja, baja el umbral hacia 25%-30%.
+   * Si colocas una banana y no se dibuja la retícula roja, baja el umbral hacia 25%-30%.
 4. **Calibrar Sensor**: Pulsa el botón **"CALIBRAR ENTORNO"** en el HUD para simular un ajuste de frecuencia de cámara y verificar la latencia.
 
 ---
@@ -37,15 +37,15 @@ Para lograr una demostración fluida y con excelente precisión de detección, s
 
 ### Modo Manual (Para interactuar en la pantalla)
 1. Coloca el selector de modo en **RATÓN**.
-2. Explica al visitante que en la pantalla se muestran las manzanas en verde (seguras) y los dientes de león en rojo (objetivos).
-3. Invita al visitante a tomar el ratón y hacer clic directamente sobre los dientes de león en pantalla para disparar el láser.
+2. Explica al visitante que en la pantalla se muestran las manzanas en verde (seguras) y las bananas (maleza) en rojo (objetivos).
+3. Invita al visitante a tomar el ratón y hacer clic directamente sobre las bananas en pantalla para disparar el láser.
 4. Muestra cómo se actualiza la puntuación, el ahorro de pesticida y la precisión. Dispara a una manzana adrede para mostrar la advertencia y penalización.
 
 ### Modo Autónomo (Para interactuar físicamente)
 1. Coloca el selector en **AUTO-DISPARO**.
-2. Explica que este modo representa el funcionamiento de un dron de fumigación dirigida o un robot desherbador automático.
-3. Invita al visitante a desplazar físicamente una tarjeta de diente de león por la mesa para colocarla justo en el centro de la mira circular de la pantalla.
-4. Muestra cómo la mira cambia a estado activo, inicia la cuenta de carga del temporizador circular y realiza el disparo láser de precisión de forma 100% autónoma en 1 segundo.
+2. Explica que este modo representa el funcionamiento de un dron de fumigación dirigida o un robot desherbador automático con mira autoguiada.
+3. Invita al visitante a colocar o desplazar físicamente una banana por la mesa.
+4. Muestra cómo la mira circular (`#auto-crosshair`) se desplaza automáticamente para fijar el objetivo (banana), inicia la cuenta de carga del temporizador circular y realiza el disparo láser de precisión en su posición exacta de forma 100% autónoma en 1 segundo.
 
 ---
 
@@ -62,7 +62,7 @@ Una de las atracciones más espectaculares para un público interesado en la inf
 3. **Fase de Captura (Webcam)**:
    * Se abrirá una ventana de captura.
    * Coloca tu manzana roja real en el visor y pulsa la tecla `1` unas 10 veces, moviendo la manzana ligeramente para capturar diferentes ángulos.
-   * Coloca tu tarjeta impresa de diente de león y pulsa la tecla `2` otras 10 veces en diferentes posiciones.
+   * Coloca tu banana y pulsa la tecla `2` otras 10 veces en diferentes posiciones.
    * Pulsa la tecla `T` para arrancar el entrenamiento.
 4. **Fase de Entrenamiento**:
    * Verás en consola cómo PyTorch ejecuta el ajuste fino de YOLOv8 en la GPU RTX 4070Ti. ¡Terminará en segundos!

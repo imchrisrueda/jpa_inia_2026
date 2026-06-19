@@ -104,9 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (payload.detections) {
                     currentDetections = payload.detections;
                     
-                    // Contar cultivos seguros en el frame actual para el HUD
-                    const cropsCount = currentDetections.filter(d => d.class === 'manzana').length;
-                    game.cropsSafe = Math.max(game.cropsSafe, cropsCount);
+                    // Contar elementos en la imagen actual (tiempo real)
+                    const applesInFrame = currentDetections.filter(d => d.class === 'manzana').length;
+                    const weedsInFrame = currentDetections.filter(d => d.class === 'maleza').length;
+                    
+                    // Actualizar contadores del visor en tiempo real
+                    document.getElementById('stats-crops').innerText = applesInFrame;
+                    document.getElementById('stats-weeds').innerText = weedsInFrame;
+                    
                     game.updateHUD();
                 }
                 
@@ -161,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnModeMouse.classList.add('active');
         btnModeAuto.classList.remove('active');
         game.interactionMode = 'mouse';
-        descMode.innerText = "Haz clic directamente sobre los dientes de león en el visor para destruirlos.";
+        descMode.innerText = "Haz clic directamente sobre las malezas (banana) en el visor para destruirlas.";
         game.logToConsole("Cambiado a Modo Manual (Ratón).", "info");
     });
 
@@ -169,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnModeAuto.classList.add('active');
         btnModeMouse.classList.remove('active');
         game.interactionMode = 'auto';
-        descMode.innerText = "Centra un diente de león en la mira del visor durante 1 segundo para disparar automáticamente.";
+        descMode.innerText = "Al reconocer una maleza (banana) por más de 1 segundo, el sistema la fijará y le disparará de forma automática.";
         game.logToConsole("Cambiado a Modo Autónomo (Auto-disparo).", "info");
         game.lastUpdateTime = Date.now();
     });
@@ -274,8 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const h = y2 - y1;
             
             // Elegir estilo según clase
-            let color = '#ff3b30'; // Rojo Diente de León
-            let labelText = `MAL: DIENTE DE LEÓN`;
+            let color = '#ff3b30'; // Rojo Maleza
+            let labelText = `MAL: MALEZA`;
             
             if (det.class === 'manzana') {
                 color = '#00ff88'; // Verde Manzana
