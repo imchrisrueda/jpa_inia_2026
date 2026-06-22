@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CropShield AI - Explicador del Modelo YOLOv8</title>
+    <!-- Fuentes de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="theme-inia">
+    <div class="simulation-container">
+        <!-- Cabecera de Simulación -->
+        <header class="sim-header">
+            <div class="header-brand">
+                <img src="/static/assets/imgs/DIG4AGRO_logo.svg" alt="DIG4AGRO Logo" class="header-brand-logo" style="height: 42px;">
+                <div class="logo-small">CROP<span>SHIELD</span></div>
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text">EXPLICADOR IA</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="title-showcase" style="font-size: 1.4rem; letter-spacing: 2px;">CÓMO VE EL MODELO YOLOv8</div>
+            </div>
+            <div class="header-right">
+                <a href="/">
+                    <button class="btn-back">← VOLVER AL HUD PRINCIPAL</button>
+                </a>
+            </div>
+        </header>
+
+        <!-- Cuerpo de Simulación -->
+        <div class="sim-body">
+            <!-- Barra Lateral Izquierda: Configuración de la Simulación -->
+            <aside class="sim-sidebar">
+                <h3 class="panel-title" style="margin-bottom: 5px;">ENTRADA DEL SIMULADOR</h3>
+                <p class="group-desc">Elige un objeto para ver cómo lo escanea y clasifica el modelo de Deep Learning en tiempo real.</p>
+                
+                <!-- Selector de Elementos -->
+                <div class="input-selector-grid">
+                    <div class="input-option-card active" id="opt-apple" data-value="apple">
+                        <span class="option-icon">🍎</span>
+                        <span class="option-label">MANZANA</span>
+                        <span class="option-sub" style="font-size: 0.65rem; color: var(--color-verde-neon); display: block; margin-top: 3px;">(CULTIVO)</span>
+                    </div>
+                    <div class="input-option-card" id="opt-banana" data-value="banana">
+                        <span class="option-icon">🍌</span>
+                        <span class="option-label">BANANA</span>
+                        <span class="option-sub" style="font-size: 0.65rem; color: var(--color-rojo-neon); display: block; margin-top: 3px;">(MALEZA)</span>
+                    </div>
+                </div>
+
+                <!-- Escáner Holográfico del Objeto -->
+                <div class="control-group" style="margin-top: 10px;">
+                    <label class="control-label">ESCANER DEL ELEMENTO</label>
+                    <div class="blueprint-display" id="blueprint-container">
+                        <canvas id="canvas-blueprint"></canvas>
+                    </div>
+                </div>
+
+                <!-- Control de Confianza YOLO -->
+                <div class="control-group">
+                    <div class="slider-header">
+                        <label class="control-label">CONFIDENCE THRESHOLD</label>
+                        <span class="slider-value" id="sim-val-conf">35%</span>
+                    </div>
+                    <input type="range" id="sim-slider-conf" min="15" max="85" value="35" class="slider">
+                    <p class="group-desc">Regula el filtro de detecciones. Si el umbral supera la confianza de la caja, esta será descartada.</p>
+                </div>
+
+                <!-- Estado del Servidor e Inferencia -->
+                <div class="panel-section hardware-section" style="margin-top: auto; background: rgba(0,0,0,0.2);">
+                    <h3 class="section-title">METRICAS YOLOv8</h3>
+                    <ul class="hw-list" style="font-size: 0.75rem;">
+                        <li>
+                            <span class="hw-label">Modelo Inferencia:</span>
+                            <span class="hw-value" style="color: var(--color-primary);">yolov8n.pt (Nano)</span>
+                        </li>
+                        <li>
+                            <span class="hw-label">Backend Hardware:</span>
+                            <span class="hw-value" id="sim-gpu-status">GPU (CUDA)</span>
+                        </li>
+                        <li>
+                            <span class="hw-label">Latencia Inferencia:</span>
+                            <span class="hw-value" style="color: var(--color-verde-neon);">2.8 ms</span>
+                        </li>
+                        <li>
+                            <span class="hw-label">FPS Visualizador:</span>
+                            <span class="hw-value" id="sim-fps-val">60</span>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Área Principal de Visualización -->
+            <main class="tab-container">
+                <!-- Navegador de Pestañas -->
+                <nav class="tab-nav">
+                    <button class="tab-btn active" data-target="tab-yolo-pipeline">ETAPAS DE VISIÓN YOLO</button>
+                    <button class="tab-btn" data-target="tab-network-flow">RED NEURONAL (SINAPSIS)</button>
+                    <button class="tab-btn" data-target="tab-feature-maps">MAPAS DE CARACTERÍSTICAS (CNN)</button>
+                </nav>
+
+                <!-- Contenido de las Pestañas -->
+                <div class="tab-content-area">
+                    
+                    <!-- Pestaña 1: Etapas de Visión YOLO (Grid, Bbox, NMS) -->
+                    <div class="tab-pane active" id="tab-yolo-pipeline">
+                        <div class="yolo-pipeline-grid">
+                            <!-- Visualizador del Canvas principal -->
+                            <div class="yolo-viewer-panel">
+                                <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+                                <canvas id="canvas-yolo-pipeline" class="yolo-viewer-canvas" width="600" height="450"></canvas>
+                            </div>
+                            
+                            <!-- Pasos del Pipeline -->
+                            <div class="pipeline-stepper">
+                                <div class="step-card active" data-step="0">
+                                    <div class="step-card-header">
+                                        <span class="step-number">1</span>
+                                        <h4 class="step-title">REJILLA DE CORTES (GRID CELLS)</h4>
+                                    </div>
+                                    <p class="step-desc">YOLO divide la imagen en una cuadrícula (ej. 8x8). Cada celda es responsable de predecir si un objeto tiene su centro geométrico dentro de ella.</p>
+                                </div>
+                                
+                                <div class="step-card" data-step="1">
+                                    <div class="step-card-header">
+                                        <span class="step-number">2</span>
+                                        <h4 class="step-title">CAJAS DE ANCLAJE (PREDICTIONS)</h4>
+                                    </div>
+                                    <p class="step-desc">Cada celda con actividad calcula varias bounding boxes tentativas con su porcentaje de confianza y las probabilidades de clase (manzana o banana).</p>
+                                </div>
+                                
+                                <div class="step-card" data-step="2">
+                                    <div class="step-card-header">
+                                        <span class="step-number">3</span>
+                                        <h4 class="step-title">SUPRESIÓN NO MÁXIMA (NMS)</h4>
+                                    </div>
+                                    <p class="step-desc">Para evitar cajas múltiples del mismo objeto, YOLO calcula la intersección sobre la unión (IoU) y elimina las predicciones redundantes con menor confianza.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña 2: Flujo de la Red Neuronal (Synapses particles) -->
+                    <div class="tab-pane" id="tab-network-flow">
+                        <div class="network-canvas-container">
+                            <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+                            <canvas id="canvas-network"></canvas>
+                            <div class="network-legend">
+                                <div class="legend-item"><span class="legend-dot input"></span> Atributos Físicos (Entrada)</div>
+                                <div class="legend-item"><span class="legend-dot hidden"></span> Filtros Intermedios (Ocultos)</div>
+                                <div class="legend-item"><span class="legend-dot crop"></span> Cultivo (Manzana)</div>
+                                <div class="legend-item"><span class="legend-dot weed"></span> Maleza (Banana)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña 3: Mapas de Características (Convolutional filters) -->
+                    <div class="tab-pane" id="tab-feature-maps">
+                        <div class="feature-maps-grid">
+                            <!-- Visualizador ampliado del mapa de características -->
+                            <div class="yolo-viewer-panel" style="aspect-ratio: 1/1; max-height: 450px;">
+                                <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+                                <canvas id="canvas-feature-zoom" class="yolo-viewer-canvas" width="450" height="450"></canvas>
+                            </div>
+                            
+                            <!-- Lista de mapas -->
+                            <div class="feature-cards-container">
+                                <div class="feature-map-card active" id="fcard-edge" data-map="edge">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-edge" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <h4>DETECTOR DE BORDES Y CONTORNOS</h4>
+                                        <p>Simula las capas convolucionales tempranas de YOLO, que detectan siluetas, orientaciones de relieve y contornos geométricos del objeto para aislarlo de la tierra.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="feature-map-card" id="fcard-color" data-map="color">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-color" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <h4>DETECTOR DE TEXTURA Y COLOR ACTIVADO</h4>
+                                        <p>Representa capas intermedias que detectan propiedades cromáticas clave: el espectro rojo para la manzana y el espectro amarillo brillante para la banana.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="feature-map-card" id="fcard-heatmap" data-map="heatmap">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-heatmap" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <h4>MAPA DE ATENCIÓN DE INFERENCIA (HEATMAP)</h4>
+                                        <p>Visualiza la importancia que asigna la red a cada pixel de la imagen (Grad-CAM) para tomar su decisión final, ignorando los pixeles neutros del suelo de cultivo.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+
+        <!-- Pie de página institucional -->
+        <footer class="hud-footer" style="background: rgba(14, 18, 15, 0.9);">
+            <img src="/static/assets/imgs/min_csic_inia_logo.png" alt="Logotipos Institucionales" class="footer-logo">
+        </footer>
+    </div>
+
+    <!-- Script del Visualizador y Simulador de YOLO -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Variables globales del simulador
+            let activeInput = 'apple'; // 'apple' o 'banana'
+            let confidenceThreshold = 0.35;
+            let activeTab = 'tab-yolo-pipeline';
+            let activeStep = 0; // Para el pipeline
+            let activeFeatureMap = 'edge'; // Para los mapas de características
+            
+            // Colores del tema actual
+            const themeColors = {
+                primary: getComputedStyle(document.body).getPropertyValue('--color-primary').trim() || '#239C42',
+                verde: '#00ff88',
+                rojo: '#ff3b30',
+                cyan: '#00f3ff',
+                dim: '#8e9ca6',
+                bg: '#070908'
+            };
+
+            // Audio Context y síntesis
+            let audioCtx = null;
+            function initAudio() {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            function playClickSound() {
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            }
+
+            // Inicializar Audio al interactuar con cualquier botón
+            document.addEventListener('click', () => {
+                initAudio();
+            }, { once: true });
+
+            // Configuración del Selector de Entrada
+            const optApple = document.getElementById('opt-apple');
+            const optBanana = document.getElementById('opt-banana');
+
+            function setInputObject(obj) {
+                if (activeInput === obj) return;
+                activeInput = obj;
+                if (obj === 'apple') {
+                    optApple.classList.add('active');
+                    optBanana.classList.remove('active');
+                } else {
+                    optBanana.classList.add('active');
+                    optApple.classList.remove('active');
+                }
+                playClickSound();
+                resetSimulations();
+            }
+
+            optApple.addEventListener('click', () => setInputObject('apple'));
+            optBanana.addEventListener('click', () => setInputObject('banana'));
+
+            // Slider de Confianza
+            const sliderConf = document.getElementById('sim-slider-conf');
+            const valConf = document.getElementById('sim-val-conf');
+            sliderConf.addEventListener('input', (e) => {
+                confidenceThreshold = e.target.value / 100;
+                valConf.innerText = `${e.target.value}%`;
+            });
+
+            // Control de Pestañas (Tabs)
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-target');
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(target).classList.add('active');
+                    activeTab = target;
+                    playClickSound();
+                    
+                    // Si pasamos a red neuronal, ajustamos el tamaño del canvas
+                    if (target === 'tab-network-flow') {
+                        resizeNetworkCanvas();
+                    }
+                });
+            });
+
+            // Control de Pasos del Pipeline de YOLO
+            const stepCards = document.querySelectorAll('.step-card');
+            stepCards.forEach((card, index) => {
+                card.addEventListener('click', () => {
+                    stepCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    activeStep = index;
+                    playClickSound();
+                });
+            });
+
+            // Control de selección de mapa de características
+            const featureCards = document.querySelectorAll('.feature-map-card');
+            featureCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    featureCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    activeFeatureMap = card.getAttribute('data-map');
+                    playClickSound();
+                });
+            });
+
+            // ---------------------------------------------------------
+            // RENDERIZADO DENTRO DE LOS DIVERSOS CANVAS
+            // ---------------------------------------------------------
+
+            // Elementos y Canvas
+            const canvasBlueprint = document.getElementById('canvas-blueprint');
+            const ctxBlueprint = canvasBlueprint.getContext('2d');
+            
+            const canvasYolo = document.getElementById('canvas-yolo-pipeline');
+            const ctxYolo = canvasYolo.getContext('2d');
+
+            const canvasNetwork = document.getElementById('canvas-network');
+            const ctxNetwork = canvasNetwork.getContext('2d');
+
+            const canvasFeatureZoom = document.getElementById('canvas-feature-zoom');
+            const ctxFeatureZoom = canvasFeatureZoom.getContext('2d');
+
+            const canvasFmapEdge = document.getElementById('canvas-fmap-edge');
+            const ctxFmapEdge = canvasFmapEdge.getContext('2d');
+
+            const canvasFmapColor = document.getElementById('canvas-fmap-color');
+            const ctxFmapColor = canvasFmapColor.getContext('2d');
+
+            const canvasFmapHeatmap = document.getElementById('canvas-fmap-heatmap');
+            const ctxFmapHeatmap = canvasFmapHeatmap.getContext('2d');
+
+            // Ajustar el tamaño del Canvas Blueprint
+            function resizeBlueprintCanvas() {
+                canvasBlueprint.width = canvasBlueprint.parentElement.clientWidth;
+                canvasBlueprint.height = canvasBlueprint.parentElement.clientHeight;
+            }
+            window.addEventListener('resize', resizeBlueprintCanvas);
+            resizeBlueprintCanvas();
+
+            // Ajustar tamaño del Canvas de Red Neuronal
+            function resizeNetworkCanvas() {
+                const parent = canvasNetwork.parentElement;
+                canvasNetwork.width = parent.clientWidth;
+                canvasNetwork.height = parent.clientHeight;
+                initNetworkStructure();
+            }
+            window.addEventListener('resize', () => {
+                if (activeTab === 'tab-network-flow') {
+                    resizeNetworkCanvas();
+                }
+            });
+
+            // Dibujador de objetos vectoriales (Manzana y Banana)
+            function drawApple(ctx, x, y, r, wireframe = false) {
+                ctx.save();
+                if (wireframe) {
+                    ctx.strokeStyle = '#00f3ff';
+                    ctx.lineWidth = 1.5;
+                    // Tallo
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - r * 0.9);
+                    ctx.quadraticCurveTo(x + r*0.3, y - r*1.3, x + r*0.45, y - r*1.4);
+                    ctx.stroke();
+                    // Hoja
+                    ctx.beginPath();
+                    ctx.ellipse(x + r*0.4, y - r*1.2, r*0.3, r*0.12, Math.PI / 4, 0, Math.PI * 2);
+                    ctx.stroke();
+                    // Cuerpo
+                    ctx.beginPath();
+                    ctx.arc(x - r*0.32, y, r*0.8, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(x + r*0.32, y, r*0.8, 0, Math.PI * 2);
+                    ctx.stroke();
+                } else {
+                    // Tallo
+                    ctx.strokeStyle = '#7A431D';
+                    ctx.lineWidth = 4;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - r * 0.9);
+                    ctx.quadraticCurveTo(x + r*0.3, y - r*1.3, x + r*0.45, y - r*1.4);
+                    ctx.stroke();
+                    // Hoja
+                    ctx.fillStyle = '#2fb35a';
+                    ctx.beginPath();
+                    ctx.ellipse(x + r*0.35, y - r*1.25, r*0.3, r*0.13, -Math.PI / 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Sombra / Cuerpo
+                    ctx.fillStyle = '#AF071F';
+                    ctx.beginPath();
+                    ctx.arc(x - r*0.28, y + r*0.08, r*0.75, 0, Math.PI*2);
+                    ctx.arc(x + r*0.28, y + r*0.08, r*0.75, 0, Math.PI*2);
+                    ctx.fill();
+                    // Color principal (Rojo vivo)
+                    ctx.fillStyle = '#ff3b30';
+                    ctx.beginPath();
+                    ctx.arc(x - r*0.28, y, r*0.75, 0, Math.PI*2);
+                    ctx.arc(x + r*0.28, y, r*0.75, 0, Math.PI*2);
+                    ctx.fill();
+                    // Brillo
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                    ctx.beginPath();
+                    ctx.arc(x - r*0.35, y - r*0.3, r*0.18, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            function drawBanana(ctx, x, y, r, wireframe = false) {
+                ctx.save();
+                if (wireframe) {
+                    ctx.strokeStyle = '#00f3ff';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    // Curva de la banana
+                    ctx.arc(x - r*0.5, y - r*0.5, r*1.35, -Math.PI/6, Math.PI*0.62, false);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(x - r*0.4, y - r*0.3, r*1.2, -Math.PI/7, Math.PI*0.60, false);
+                    ctx.stroke();
+                } else {
+                    // Cuerpo de la banana
+                    ctx.fillStyle = '#ffcc00';
+                    ctx.beginPath();
+                    // Curva externa
+                    ctx.arc(x - r*0.5, y - r*0.5, r*1.3, -Math.PI/6, Math.PI*0.63, false);
+                    // Curva interna de retorno
+                    ctx.arc(x - r*0.3, y - r*0.3, r*1.08, Math.PI*0.60, -Math.PI/8, true);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // Cuerpo central (brillante)
+                    ctx.fillStyle = '#ffe033';
+                    ctx.beginPath();
+                    ctx.arc(x - r*0.5, y - r*0.5, r*1.25, -Math.PI/7, Math.PI*0.62, false);
+                    ctx.arc(x - r*0.33, y - r*0.33, r*1.12, Math.PI*0.59, -Math.PI/9, true);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Punta oscura
+                    ctx.fillStyle = '#4D3B00';
+                    ctx.beginPath();
+                    ctx.arc(x - r*0.5, y - r*0.5, r*1.3, -Math.PI/6, -Math.PI/8, false);
+                    ctx.lineTo(x + r*0.65, y - r*1.1);
+                    ctx.fill();
+
+                    // Tallo de corte
+                    ctx.fillStyle = '#7A6200';
+                    ctx.beginPath();
+                    ctx.arc(x - r*0.5, y - r*0.5, r*1.3, Math.PI*0.62, Math.PI*0.64, false);
+                    ctx.lineTo(x - r*0.4, y + r*0.85);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // 1. ENGINE 1: ESCANER BLUEPRINT
+            let blueprintAngle = 0;
+            function runBlueprintScanner() {
+                if (!ctxBlueprint) return;
+                const w = canvasBlueprint.width;
+                const h = canvasBlueprint.height;
+                ctxBlueprint.clearRect(0, 0, w, h);
+
+                // Cuadrícula futurista
+                ctxBlueprint.strokeStyle = 'rgba(0, 243, 255, 0.05)';
+                ctxBlueprint.lineWidth = 1;
+                for (let x = 0; x < w; x += 20) {
+                    ctxBlueprint.beginPath();
+                    ctxBlueprint.moveTo(x, 0);
+                    ctxBlueprint.lineTo(x, h);
+                    ctxBlueprint.stroke();
+                }
+                for (let y = 0; y < h; y += 20) {
+                    ctxBlueprint.beginPath();
+                    ctxBlueprint.moveTo(0, y);
+                    ctxBlueprint.lineTo(w, y);
+                    ctxBlueprint.stroke();
+                }
+
+                // Círculos del radar
+                const cx = w / 2;
+                const cy = h / 2;
+                const radarRadius = Math.min(w, h) * 0.45;
+                ctxBlueprint.strokeStyle = 'rgba(0, 243, 255, 0.25)';
+                ctxBlueprint.beginPath();
+                ctxBlueprint.arc(cx, cy, radarRadius, 0, Math.PI * 2);
+                ctxBlueprint.stroke();
+
+                ctxBlueprint.strokeStyle = 'rgba(0, 243, 255, 0.1)';
+                ctxBlueprint.beginPath();
+                ctxBlueprint.arc(cx, cy, radarRadius * 0.6, 0, Math.PI * 2);
+                ctxBlueprint.stroke();
+
+                // Línea de barrido rotatorio
+                blueprintAngle += 0.015;
+                const lx = cx + Math.cos(blueprintAngle) * radarRadius;
+                const ly = cy + Math.sin(blueprintAngle) * radarRadius;
+
+                // Gradiente para el haz del radar
+                ctxBlueprint.save();
+                ctxBlueprint.beginPath();
+                ctxBlueprint.moveTo(cx, cy);
+                ctxBlueprint.arc(cx, cy, radarRadius, blueprintAngle - 0.2, blueprintAngle);
+                ctxBlueprint.closePath();
+                const scanGrad = ctxBlueprint.createRadialGradient(cx, cy, 10, cx, cy, radarRadius);
+                scanGrad.addColorStop(0, 'rgba(0, 243, 255, 0.3)');
+                scanGrad.addColorStop(1, 'rgba(0, 243, 255, 0)');
+                ctxBlueprint.fillStyle = scanGrad;
+                ctxBlueprint.fill();
+                ctxBlueprint.restore();
+
+                // Línea del haz principal
+                ctxBlueprint.strokeStyle = '#00f3ff';
+                ctxBlueprint.lineWidth = 1.5;
+                ctxBlueprint.beginPath();
+                ctxBlueprint.moveTo(cx, cy);
+                ctxBlueprint.lineTo(lx, ly);
+                ctxBlueprint.stroke();
+
+                // Dibujar objeto en wireframe
+                if (activeInput === 'apple') {
+                    drawApple(ctxBlueprint, cx, cy, 38, true);
+                    ctxBlueprint.fillStyle = '#00f3ff';
+                    ctxBlueprint.font = '10px Share Tech Mono';
+                    ctxBlueprint.fillText("SCANNING: CROP [APPLE]", 10, h - 15);
+                    ctxBlueprint.fillText("SHAPE: SPHERICAL", 10, 20);
+                } else {
+                    drawBanana(ctxBlueprint, cx, cy, 35, true);
+                    ctxBlueprint.fillStyle = '#00f3ff';
+                    ctxBlueprint.font = '10px Share Tech Mono';
+                    ctxBlueprint.fillText("SCANNING: WEED [BANANA]", 10, h - 15);
+                    ctxBlueprint.fillText("SHAPE: ELONGATED", 10, 20);
+                }
+
+                // Punto parpadeante
+                if (Math.floor(Date.now() / 400) % 2 === 0) {
+                    ctxBlueprint.fillStyle = '#ff3b30';
+                    ctxBlueprint.beginPath();
+                    ctxBlueprint.arc(w - 20, 20, 4, 0, Math.PI * 2);
+                    ctxBlueprint.fill();
+                    ctxBlueprint.fillStyle = 'rgba(255, 59, 48, 0.2)';
+                    ctxBlueprint.beginPath();
+                    ctxBlueprint.arc(w - 20, 20, 8, 0, Math.PI * 2);
+                    ctxBlueprint.fill();
+                }
+
+                requestAnimationFrame(runBlueprintScanner);
+            }
+            runBlueprintScanner();
+
+            // 2. ENGINE 2: PIPELINE DE ETAPAS DE YOLO
+            let nmsStepTimer = 0;
+            function renderYoloPipeline() {
+                if (activeTab !== 'tab-yolo-pipeline' || !ctxYolo) return;
+                const w = canvasYolo.width;
+                const h = canvasYolo.height;
+                ctxYolo.clearRect(0, 0, w, h);
+
+                const objX = w / 2;
+                const objY = h / 2;
+                const objSize = 65;
+
+                // Fondo
+                ctxYolo.fillStyle = '#090a0f';
+                ctxYolo.fillRect(0, 0, w, h);
+
+                // Dibujar el objeto según el input
+                if (activeInput === 'apple') {
+                    drawApple(ctxYolo, objX, objY, objSize, false);
+                } else {
+                    drawBanana(ctxYolo, objX, objY, objSize, false);
+                }
+
+                // Dibujar según el paso activo
+                if (activeStep === 0) {
+                    const gridCount = 8;
+                    const cellW = w / gridCount;
+                    const cellH = h / gridCount;
+
+                    ctxYolo.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                    ctxYolo.lineWidth = 1;
+
+                    for (let i = 1; i < gridCount; i++) {
+                        ctxYolo.beginPath();
+                        ctxYolo.moveTo(i * cellW, 0);
+                        ctxYolo.lineTo(i * cellW, h);
+                        ctxYolo.stroke();
+
+                        ctxYolo.beginPath();
+                        ctxYolo.moveTo(0, i * cellH);
+                        ctxYolo.lineTo(w, i * cellH);
+                        ctxYolo.stroke();
+                    }
+
+                    const targetCol = Math.floor(objX / cellW);
+                    const targetRow = Math.floor(objY / cellH);
+
+                    ctxYolo.fillStyle = 'rgba(35, 156, 66, 0.25)';
+                    ctxYolo.fillRect(targetCol * cellW, targetRow * cellH, cellW, cellH);
+                    ctxYolo.strokeStyle = themeColors.primary;
+                    ctxYolo.lineWidth = 2;
+                    ctxYolo.strokeRect(targetCol * cellW, targetRow * cellH, cellW, cellH);
+
+                    ctxYolo.beginPath();
+                    ctxYolo.arc(targetCol * cellW + cellW/2, targetRow * cellH + cellH/2, 6, 0, Math.PI*2);
+                    ctxYolo.fillStyle = themeColors.primary;
+                    ctxYolo.fill();
+
+                    ctxYolo.fillStyle = '#ffffff';
+                    ctxYolo.font = '11px Share Tech Mono';
+                    ctxYolo.fillText(`CELDA RESPONSABLE: [Col ${targetCol}, Row ${targetRow}]`, targetCol * cellW - 50, targetRow * cellH - 10);
+                }
+                else if (activeStep === 1) {
+                    const boxes = [];
+                    if (activeInput === 'apple') {
+                        boxes.push({ x1: objX - 85, y1: objY - 95, w: 170, h: 180, conf: 0.98, label: 'manzana', active: 0.98 >= confidenceThreshold });
+                        boxes.push({ x1: objX - 40, y1: objY - 145, w: 90, h: 80, conf: 0.42, label: 'maleza', active: 0.42 >= confidenceThreshold });
+                        boxes.push({ x1: objX + 35, y1: objY - 70, w: 70, h: 90, conf: 0.22, label: 'manzana', active: 0.22 >= confidenceThreshold });
+                    } else {
+                        boxes.push({ x1: objX - 95, y1: objY - 100, w: 190, h: 190, conf: 0.95, label: 'maleza', active: 0.95 >= confidenceThreshold });
+                        boxes.push({ x1: objX - 140, y1: objY - 30, w: 80, h: 90, conf: 0.38, label: 'maleza', active: 0.38 >= confidenceThreshold });
+                        boxes.push({ x1: objX - 30, y1: objY - 130, w: 90, h: 70, conf: 0.18, label: 'manzana', active: 0.18 >= confidenceThreshold });
+                    }
+
+                    boxes.forEach(box => {
+                        if (box.active) {
+                            const color = box.label === 'manzana' ? themeColors.verde : themeColors.rojo;
+                            ctxYolo.strokeStyle = color;
+                            ctxYolo.lineWidth = 2;
+                            ctxYolo.strokeRect(box.x1, box.y1, box.w, box.h);
+
+                            ctxYolo.fillStyle = color;
+                            ctxYolo.fillRect(box.x1, box.y1 - 18, 120, 18);
+                            ctxYolo.fillStyle = '#000000';
+                            ctxYolo.font = '700 10px Orbitron';
+                            ctxYolo.fillText(`${box.label.toUpperCase()} ${(box.conf * 100).toFixed(0)}%`, box.x1 + 5, box.y1 - 5);
+                        } else {
+                            ctxYolo.strokeStyle = 'rgba(162, 170, 173, 0.2)';
+                            ctxYolo.setLineDash([5, 5]);
+                            ctxYolo.lineWidth = 1;
+                            ctxYolo.strokeRect(box.x1, box.y1, box.w, box.h);
+                            ctxYolo.setLineDash([]);
+
+                            ctxYolo.fillStyle = 'rgba(162, 170, 173, 0.4)';
+                            ctxYolo.font = '9px Orbitron';
+                            ctxYolo.fillText(`FILTRADA: ${(box.conf * 100).toFixed(0)}%`, box.x1 + 5, box.y1 - 5);
+                        }
+                    });
+                }
+                else if (activeStep === 2) {
+                    nmsStepTimer += 0.02;
+                    const fade = Math.max(0, 1 - (nmsStepTimer % 2.5) * 0.8);
+                    
+                    const isApple = activeInput === 'apple';
+                    const mainConf = isApple ? 0.98 : 0.95;
+                    const secConf = isApple ? 0.86 : 0.81;
+                    const label = isApple ? 'manzana' : 'maleza';
+                    const color = label === 'manzana' ? themeColors.verde : themeColors.rojo;
+
+                    const mainBox = { x1: objX - 85, y1: objY - 95, w: 170, h: 180 };
+                    if (mainConf >= confidenceThreshold) {
+                        ctxYolo.strokeStyle = color;
+                        ctxYolo.lineWidth = 2.5;
+                        ctxYolo.strokeRect(mainBox.x1, mainBox.y1, mainBox.w, mainBox.h);
+
+                        ctxYolo.fillStyle = color;
+                        ctxYolo.fillRect(mainBox.x1, mainBox.y1 - 18, 120, 18);
+                        ctxYolo.fillStyle = '#000000';
+                        ctxYolo.font = '700 10px Orbitron';
+                        ctxYolo.fillText(`${label.toUpperCase()} ${(mainConf * 100).toFixed(0)}%`, mainBox.x1 + 5, mainBox.y1 - 5);
+                    }
+
+                    const secBox = { x1: objX - 70, y1: objY - 80, w: 155, h: 165 };
+                    if (secConf >= confidenceThreshold) {
+                        ctxYolo.strokeStyle = `rgba(${label === 'manzana' ? '0,255,136' : '255,59,48'}, ${fade})`;
+                        ctxYolo.lineWidth = 1.5;
+                        ctxYolo.strokeRect(secBox.x1, secBox.y1, secBox.w, secBox.h);
+
+                        ctxYolo.fillStyle = `rgba(${label === 'manzana' ? '0,255,136' : '255,59,48'}, ${fade})`;
+                        ctxYolo.fillRect(secBox.x1, secBox.y1 - 18, 120, 18);
+                        ctxYolo.fillStyle = `rgba(0,0,0, ${fade})`;
+                        ctxYolo.font = '700 10px Orbitron';
+                        ctxYolo.fillText(`REDUNDANTE ${(secConf * 100).toFixed(0)}%`, secBox.x1 + 5, secBox.y1 - 5);
+
+                        ctxYolo.fillStyle = '#00f3ff';
+                        ctxYolo.font = '11px Share Tech Mono';
+                        ctxYolo.fillText(`IoU SOLAPE: 84% > 45% (UMBRAL)`, objX - 80, objY + 110);
+                        ctxYolo.fillText("ELIMINANDO CAJA REDUNDANTE POR NMS...", objX - 100, objY + 130);
+                    } else {
+                        ctxYolo.fillStyle = '#8e9ca6';
+                        ctxYolo.font = '11px Share Tech Mono';
+                        ctxYolo.fillText("INFERIOR AL CONFIDENCE THRESHOLD", objX - 100, objY + 120);
+                    }
+                }
+            }
+
+            // 3. ENGINE 3: FLUJO DE RED NEURONAL
+            let layers = [];
+            let connections = [];
+            let networkParticles = [];
+
+            function initNetworkStructure() {
+                if (!canvasNetwork) return;
+                const w = canvasNetwork.width;
+                const h = canvasNetwork.height;
+
+                layers = [
+                    {
+                        name: 'Entrada',
+                        nodes: [
+                            { id: 'in_red', label: 'Color Rojo', x: w * 0.15, y: h * 0.2, val: 0, active: false },
+                            { id: 'in_yellow', label: 'Color Amarillo', x: w * 0.15, y: h * 0.4, val: 0, active: false },
+                            { id: 'in_round', label: 'Redondez', x: w * 0.15, y: h * 0.6, val: 0, active: false },
+                            { id: 'in_elong', label: 'Alargamiento', x: w * 0.15, y: h * 0.8, val: 0, active: false }
+                        ]
+                    },
+                    {
+                        name: 'Oculta 1',
+                        nodes: [
+                            { id: 'h1_edges', label: 'Filtro Bordes', x: w * 0.4, y: h * 0.25, val: 0, active: false },
+                            { id: 'h1_texture', label: 'Textura Piel', x: w * 0.4, y: h * 0.5, val: 0, active: false },
+                            { id: 'h1_stem', label: 'Tallo/Corte', x: w * 0.4, y: h * 0.75, val: 0, active: false }
+                        ]
+                    },
+                    {
+                        name: 'Oculta 2',
+                        nodes: [
+                            { id: 'h2_apple_shape', label: 'Patrón Manzana', x: w * 0.65, y: h * 0.35, val: 0, active: false },
+                            { id: 'h2_banana_shape', label: 'Patrón Banana', x: w * 0.65, y: h * 0.65, val: 0, active: false }
+                        ]
+                    },
+                    {
+                        name: 'Salida',
+                        nodes: [
+                            { id: 'out_crop', label: 'Cultivo (Apple)', x: w * 0.88, y: h * 0.35, val: 0, active: false },
+                            { id: 'out_weed', label: 'Maleza (Banana)', x: w * 0.88, y: h * 0.65, val: 0, active: false }
+                        ]
+                    }
+                ];
+
+                connections = [];
+                for (let l = 0; l < layers.length - 1; l++) {
+                    const currentLayer = layers[l];
+                    const nextLayer = layers[l + 1];
+                    currentLayer.nodes.forEach(src => {
+                        nextLayer.nodes.forEach(dst => {
+                            let weight = Math.random() * 2 - 1;
+                            if (src.id === 'in_red' && dst.id === 'h1_texture') weight = 0.85;
+                            if (src.id === 'in_yellow' && dst.id === 'h1_texture') weight = -0.75;
+                            
+                            connections.push({
+                                src: src,
+                                dst: dst,
+                                weight: weight,
+                                active: false
+                            });
+                        });
+                    });
+                }
+                
+                networkParticles = [];
+            }
+
+            function updateNetworkState() {
+                if (layers.length === 0) return;
+
+                layers[0].nodes.forEach(node => {
+                    if (activeInput === 'apple') {
+                        node.active = (node.id === 'in_red' || node.id === 'in_round');
+                        node.val = node.active ? 1.0 : 0.05;
+                    } else {
+                        node.active = (node.id === 'in_yellow' || node.id === 'in_elong');
+                        node.val = node.active ? 1.0 : 0.05;
+                    }
+                });
+
+                layers[1].nodes.forEach(node => {
+                    if (activeInput === 'apple') {
+                        node.active = (node.id === 'h1_edges' || node.id === 'h1_texture');
+                        node.val = node.id === 'h1_edges' ? 0.9 : (node.id === 'h1_texture' ? 0.85 : 0.15);
+                    } else {
+                        node.active = (node.id === 'h1_edges' || node.id === 'h1_stem');
+                        node.val = node.id === 'h1_edges' ? 0.85 : (node.id === 'h1_stem' ? 0.8 : 0.15);
+                    }
+                });
+
+                layers[2].nodes.forEach(node => {
+                    if (activeInput === 'apple') {
+                        node.active = (node.id === 'h2_apple_shape');
+                        node.val = node.id === 'h2_apple_shape' ? 0.95 : 0.05;
+                    } else {
+                        node.active = (node.id === 'h2_banana_shape');
+                        node.val = node.id === 'h2_banana_shape' ? 0.92 : 0.05;
+                    }
+                });
+
+                const isCropConfirmed = (activeInput === 'apple' && 0.98 >= confidenceThreshold);
+                const isWeedConfirmed = (activeInput === 'banana' && 0.95 >= confidenceThreshold);
+
+                layers[3].nodes.forEach(node => {
+                    if (node.id === 'out_crop') {
+                        node.active = isCropConfirmed;
+                        node.val = activeInput === 'apple' ? 0.98 : 0.02;
+                    } else {
+                        node.active = isWeedConfirmed;
+                        node.val = activeInput === 'banana' ? 0.95 : 0.03;
+                    }
+                });
+
+                connections.forEach(conn => {
+                    conn.active = conn.src.active && conn.dst.active;
+                });
+            }
+
+            function spawnNetworkParticles() {
+                if (layers.length === 0) return;
+                
+                layers[0].nodes.forEach(node => {
+                    if (node.active && Math.random() < 0.08) {
+                        const activeOutConns = connections.filter(c => c.src.id === node.id && c.active);
+                        activeOutConns.forEach(conn => {
+                            networkParticles.push({
+                                x: conn.src.x,
+                                y: conn.src.y,
+                                target: conn.dst,
+                                speed: 2.0 + Math.random() * 1.5,
+                                size: 2 + Math.random() * 2,
+                                progress: 0,
+                                color: activeInput === 'apple' ? themeColors.verde : '#ffcc00',
+                                path: conn
+                            });
+                        });
+                    }
+                });
+            }
+
+            function renderNetworkFlow() {
+                if (activeTab !== 'tab-network-flow' || !ctxNetwork) return;
+                const w = canvasNetwork.width;
+                const h = canvasNetwork.height;
+                ctxNetwork.clearRect(0, 0, w, h);
+
+                ctxNetwork.strokeStyle = 'rgba(255,255,255,0.02)';
+                ctxNetwork.lineWidth = 1;
+                for (let x = 0; x < w; x += 40) {
+                    ctxNetwork.beginPath();
+                    ctxNetwork.moveTo(x, 0);
+                    ctxNetwork.lineTo(x, h);
+                    ctxNetwork.stroke();
+                }
+                for (let y = 0; y < h; y += 40) {
+                    ctxNetwork.beginPath();
+                    ctxNetwork.moveTo(0, y);
+                    ctxNetwork.lineTo(w, y);
+                    ctxNetwork.stroke();
+                }
+
+                updateNetworkState();
+                spawnNetworkParticles();
+
+                connections.forEach(conn => {
+                    ctxNetwork.beginPath();
+                    ctxNetwork.moveTo(conn.src.x, conn.src.y);
+                    ctxNetwork.lineTo(conn.dst.x, conn.dst.y);
+                    
+                    if (conn.active) {
+                        ctxNetwork.strokeStyle = activeInput === 'apple' ? 'rgba(0, 255, 136, 0.45)' : 'rgba(255, 204, 0, 0.45)';
+                        ctxNetwork.lineWidth = 2.0;
+                    } else {
+                        ctxNetwork.strokeStyle = 'rgba(142, 156, 166, 0.08)';
+                        ctxNetwork.lineWidth = 1.0;
+                    }
+                    ctxNetwork.stroke();
+                });
+
+                for (let i = networkParticles.length - 1; i >= 0; i--) {
+                    const p = networkParticles[i];
+                    p.progress += p.speed / 100;
+                    
+                    if (p.progress >= 1.0) {
+                        const nextLayerIndex = layers.findIndex(l => l.nodes.some(n => n.id === p.target.id)) + 1;
+                        if (nextLayerIndex < layers.length) {
+                            const nextConns = connections.filter(c => c.src.id === p.target.id && c.active);
+                            nextConns.forEach(nc => {
+                                networkParticles.push({
+                                    x: nc.src.x,
+                                    y: nc.src.y,
+                                    target: nc.dst,
+                                    speed: p.speed,
+                                    size: p.size,
+                                    progress: 0,
+                                    color: p.color,
+                                    path: nc
+                                });
+                            });
+                        }
+                        networkParticles.splice(i, 1);
+                        continue;
+                    }
+
+                    const px = p.x + (p.target.x - p.x) * p.progress;
+                    const py = p.y + (p.target.y - p.y) * p.progress;
+
+                    ctxNetwork.fillStyle = p.color;
+                    ctxNetwork.beginPath();
+                    ctxNetwork.arc(px, py, p.size, 0, Math.PI * 2);
+                    ctxNetwork.fill();
+
+                    ctxNetwork.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctxNetwork.beginPath();
+                    ctxNetwork.arc(px, py, p.size * 2, 0, Math.PI * 2);
+                    ctxNetwork.fill();
+                }
+
+                layers.forEach(layer => {
+                    layer.nodes.forEach(node => {
+                        ctxNetwork.save();
+                        
+                        let nodeColor = 'rgba(142, 156, 166, 0.3)';
+                        let glowColor = 'rgba(0,0,0,0)';
+                        
+                        if (node.active) {
+                            if (node.id.startsWith('in_')) {
+                                nodeColor = themeColors.cyan;
+                                glowColor = 'rgba(0, 243, 255, 0.4)';
+                            } else if (node.id.startsWith('h1_') || node.id.startsWith('h2_')) {
+                                nodeColor = themeColors.primary;
+                                glowColor = 'rgba(35, 156, 66, 0.4)';
+                            } else if (node.id === 'out_crop') {
+                                nodeColor = themeColors.verde;
+                                glowColor = 'rgba(0, 255, 136, 0.5)';
+                            } else if (node.id === 'out_weed') {
+                                nodeColor = themeColors.rojo;
+                                glowColor = 'rgba(255, 59, 48, 0.5)';
+                            }
+                        }
+
+                        if (node.active) {
+                            ctxNetwork.shadowColor = glowColor;
+                            ctxNetwork.shadowBlur = 15;
+                            ctxNetwork.fillStyle = glowColor;
+                            ctxNetwork.beginPath();
+                            ctxNetwork.arc(node.x, node.y, 16, 0, Math.PI * 2);
+                            ctxNetwork.fill();
+                            ctxNetwork.shadowBlur = 0;
+                        }
+
+                        ctxNetwork.strokeStyle = node.active ? nodeColor : 'rgba(142, 156, 166, 0.3)';
+                        ctxNetwork.lineWidth = node.active ? 2.5 : 1.5;
+                        ctxNetwork.fillStyle = '#0d0e12';
+                        ctxNetwork.beginPath();
+                        ctxNetwork.arc(node.x, node.y, 12, 0, Math.PI * 2);
+                        ctxNetwork.fill();
+                        ctxNetwork.stroke();
+
+                        ctxNetwork.fillStyle = node.active ? nodeColor : 'rgba(142, 156, 166, 0.15)';
+                        ctxNetwork.beginPath();
+                        ctxNetwork.arc(node.x, node.y, 6, 0, Math.PI * 2);
+                        ctxNetwork.fill();
+
+                        ctxNetwork.fillStyle = node.active ? '#ffffff' : '#7f8c94';
+                        ctxNetwork.font = node.active ? '700 10px Orbitron' : '10px Orbitron';
+                        ctxNetwork.textAlign = 'center';
+                        ctxNetwork.fillText(node.label, node.x, node.y - 20);
+
+                        ctxNetwork.fillStyle = node.active ? nodeColor : '#4f5c64';
+                        ctxNetwork.font = '9px Share Tech Mono';
+                        ctxNetwork.fillText(node.val.toFixed(2), node.x, node.y + 24);
+
+                        ctxNetwork.restore();
+                    });
+                });
+            }
+
+            // 4. ENGINE 4: MAPAS DE CARACTERÍSTICAS
+            function renderFeatureMaps() {
+                if (activeTab !== 'tab-feature-maps') return;
+
+                drawMiniFeatureMap(canvasFmapEdge, 'edge');
+                drawMiniFeatureMap(canvasFmapColor, 'color');
+                drawMiniFeatureMap(canvasFmapHeatmap, 'heatmap');
+
+                const w = canvasFeatureZoom.width;
+                const h = canvasFeatureZoom.height;
+                ctxFeatureZoom.clearRect(0, 0, w, h);
+                
+                ctxFeatureZoom.fillStyle = '#000000';
+                ctxFeatureZoom.fillRect(0, 0, w, h);
+
+                drawFeatureFilter(ctxFeatureZoom, w/2, h/2, 120, activeFeatureMap);
+
+                ctxFeatureZoom.strokeStyle = 'rgba(0, 243, 255, 0.05)';
+                ctxFeatureZoom.lineWidth = 1;
+                for (let x = 0; x < w; x += 30) {
+                    ctxFeatureZoom.beginPath();
+                    ctxFeatureZoom.moveTo(x, 0);
+                    ctxFeatureZoom.lineTo(x, h);
+                    ctxFeatureZoom.stroke();
+                    ctxFeatureZoom.beginPath();
+                    ctxFeatureZoom.moveTo(0, x);
+                    ctxFeatureZoom.lineTo(w, x);
+                    ctxFeatureZoom.stroke();
+                }
+
+                ctxFeatureZoom.fillStyle = '#00f3ff';
+                ctxFeatureZoom.font = '10px Share Tech Mono';
+                ctxFeatureZoom.fillText(`FILTRO ACTIVO: [${activeFeatureMap.toUpperCase()}]`, 15, 25);
+                ctxFeatureZoom.fillText("SENSADO DUPLEX DE TEXTURA", 15, h - 15);
+            }
+
+            function drawMiniFeatureMap(canvas, type) {
+                const ctx = canvas.getContext('2d');
+                const w = canvas.width;
+                const h = canvas.height;
+                ctx.clearRect(0, 0, w, h);
+                
+                ctx.fillStyle = '#00';
+                ctx.fillRect(0, 0, w, h);
+
+                drawFeatureFilter(ctx, w/2, h/2, 30, type);
+            }
+
+            function drawFeatureFilter(ctx, x, y, r, type) {
+                ctx.save();
+
+                if (type === 'edge') {
+                    ctx.shadowColor = '#00ff88';
+                    ctx.shadowBlur = 4;
+                    if (activeInput === 'apple') {
+                        drawApple(ctx, x, y, r, true);
+                    } else {
+                        drawBanana(ctx, x, y, r, true);
+                    }
+                }
+                else if (type === 'color') {
+                    if (activeInput === 'apple') {
+                        ctx.fillStyle = 'rgba(255, 59, 48, 0.2)';
+                        ctx.strokeStyle = '#ff3b30';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(x - r*0.28, y, r*0.75, 0, Math.PI*2);
+                        ctx.arc(x + r*0.28, y, r*0.75, 0, Math.PI*2);
+                        ctx.fill();
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = 'rgba(255, 204, 0, 0.2)';
+                        ctx.strokeStyle = '#ffcc00';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(x - r*0.5, y - r*0.5, r*1.3, -Math.PI/6, Math.PI*0.63, false);
+                        ctx.arc(x - r*0.3, y - r*0.3, r*1.08, Math.PI*0.60, -Math.PI/8, true);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                }
+                else if (type === 'heatmap') {
+                    const grad = ctx.createRadialGradient(x, y, 2, x, y, r * 1.2);
+                    grad.addColorStop(0, 'rgba(255, 59, 48, 1)');
+                    grad.addColorStop(0.3, 'rgba(255, 204, 0, 0.85)');
+                    grad.addColorStop(0.6, 'rgba(0, 255, 136, 0.4)');
+                    grad.addColorStop(1, 'rgba(0, 0, 255, 0)');
+                    
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(x, y, r * 1.3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+                    ctx.lineWidth = 1;
+                    if (activeInput === 'apple') {
+                        drawApple(ctx, x, y, r, true);
+                    } else {
+                        drawBanana(ctx, x, y, r, true);
+                    }
+                }
+
+                ctx.restore();
+            }
+
+            // BUCLE DE ANIMACIÓN
+            let lastLoopTime = performance.now();
+            let simFps = 0;
+            let simFrameCount = 0;
+
+            function mainAnimationLoop(now) {
+                simFrameCount++;
+                if (now - lastLoopTime >= 1000) {
+                    simFps = simFrameCount;
+                    simFrameCount = 0;
+                    lastLoopTime = now;
+                    document.getElementById('sim-fps-val').innerText = simFps;
+                }
+
+                if (activeTab === 'tab-yolo-pipeline') {
+                    renderYoloPipeline();
+                } else if (activeTab === 'tab-network-flow') {
+                    renderNetworkFlow();
+                } else if (activeTab === 'tab-feature-maps') {
+                    renderFeatureMaps();
+                }
+
+                requestAnimationFrame(mainAnimationLoop);
+            }
+
+            function resetSimulations() {
+                nmsStepTimer = 0;
+                initNetworkStructure();
+            }
+
+            initNetworkStructure();
+            requestAnimationFrame(mainAnimationLoop);
+        });
+    </script>
+</body>
+</html>

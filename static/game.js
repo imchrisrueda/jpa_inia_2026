@@ -115,7 +115,8 @@ class CropShieldGame {
             }
         }
 
-        let laserColor = '#ff3b30'; // Láser rojo CSIC por defecto
+        // Obtener el color del láser definido en el tema CSS activo
+        let laserColor = getComputedStyle(document.body).getPropertyValue('--color-laser').trim() || '#ff3b30';
 
         if (hitSomething) {
             this.accurateShots++;
@@ -146,7 +147,9 @@ class CropShieldGame {
         } else {
             // Disparo al vacío
             this.logToConsole(`[MISS] Disparo de precisión disipado en (${targetX.toFixed(0)}, ${targetY.toFixed(0)})`, 'system');
-            particles.emit(targetX, targetY, '#A2AAAD', 10);
+            // Obtener el color secundario del tema dinámicamente
+            const secondaryColor = getComputedStyle(document.body).getPropertyValue('--color-secondary').trim() || '#A2AAAD';
+            particles.emit(targetX, targetY, secondaryColor, 10);
         }
 
         // Registrar efecto visual

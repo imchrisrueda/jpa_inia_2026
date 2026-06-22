@@ -70,3 +70,38 @@ Una de las atracciones más espectaculares para un público interesado en la inf
 5. **Reinicio**:
    * Vuelve a arrancar el juego con `.\run.ps1`.
    * El backend detectará el nuevo archivo `best.pt` y ejecutará la demostración utilizando tu modelo recién entrenado.
+
+---
+
+## 6. Explicador del Modelo y Simulación Visual (Cómo ve YOLO)
+
+El sistema incluye dos herramientas didácticas para que el público general comprenda el proceso de visión computacional y el funcionamiento interno de las redes neuronales convolucionales.
+
+### A. Simulador Web Interactivo (Explicador IA)
+1. **Acceso**: Desde el HUD principal, presiona el botón **"EXPLICADOR IA (CÓMO VE YOLO)"** en la esquina inferior derecha.
+2. **Selector de Entrada**: Alterna entre una **Manzana** o una **Banana** para cargar sus propiedades físicas en tiempo real.
+3. **Pestaña 1: Etapas de Visión YOLO**: Explica paso a paso cómo funciona la detección de objetos:
+   * *Rejilla*: Muestra el concepto de celdas y resalta la celda central activa.
+   * *Cajas de Anclaje*: Visualiza la diferencia entre las predicciones que superan el threshold (opacidad normal) y las que son descartadas (línea punteada opaca).
+   * *NMS*: Simula el desvanecimiento de cajas redundantes con base en su solape (IoU).
+4. **Pestaña 2: Flujo de la Red Neuronal**: Dibuja el grafo de sinapsis con flujos de partículas que viajan desde los atributos de entrada (redondez, alargamiento, color) hacia la clasificación de salida.
+5. **Pestaña 3: Mapas de Características**: Simula las convoluciones con tres filtros: bordes (siluetas), color (espectro activo) y mapa de calor (atención/Grad-CAM).
+
+### B. Animación Matemática en Vídeo (Manim)
+Si deseas generar un vídeo de animación de alta calidad para pantallas del stand o presentaciones:
+1. **Instalar dependencias**:
+   * Asegúrate de tener `ffmpeg` instalado en tu sistema Windows (y agregada en el PATH).
+   * Activa el entorno virtual e instala `manim`:
+     ```powershell
+     .\.venv\Scripts\pip.exe install manim
+     ```
+2. **Generar el vídeo**:
+   * Ejecuta el compilador de Manim para renderizar la escena en calidad de vista previa rápida (`-pql`):
+     ```powershell
+     .\.venv\Scripts\manim.exe -pql .\visualize_manim.py YOLOExplanation
+     ```
+   * O en calidad alta para el showcase (`-pqh`):
+     ```powershell
+     .\.venv\Scripts\manim.exe -pqh .\visualize_manim.py YOLOExplanation
+     ```
+   * El vídeo resultante se guardará automáticamente en la carpeta `media/videos/visualize_manim/`.

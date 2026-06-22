@@ -89,3 +89,22 @@
 * **Riesgos**: Fallo en los comandos de PowerShell por políticas de ejecución de scripts en Windows.
   * *Mitigación*: Detallar en `INSTALL.md` cómo omitir la política (`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`).
 * **Estado**: COMPLETADO
+
+---
+
+## Tarea 6: Visualizador Explicador y Simulación del Modelo (Cómo ve YOLO)
+* **Resultado parcial**: Página de simulación interactiva con Canvas, flujo de red neuronal, etapas YOLO y mapas convolucionales; script en Python con Manim para renderizado de vídeo explicativo.
+* **Archivos previstos**:
+  * `static/simulation.html` (Visor holográfico interactivo de YOLO)
+  * `visualize_manim.py` (Script de escena matemática en Manim)
+  * `main.py` (Nueva ruta HTTP `/simulation`)
+  * `USER_GUIDE.md` (Documentación para uso y renderizado)
+  * `CHANGELOG.md` (Registro histórico de la versión 1.3.0)
+* **Dependencias**: Tarea 3.
+* **Criterios de aceptación**:
+  * Redirección interactiva bidireccional entre la cabina HUD y el explicador.
+  * Visualización reactiva en tiempo real ante cambios del selector de fruta y del slider de umbral de confianza.
+  * Renderizado fluido (>30 FPS) en Canvas sin dependencias complejas.
+  * Script de Manim sintácticamente correcto para compilar vídeos explicativos de la red neuronal.
+* **Pruebas**: Navegación manual por las pestañas, ajuste del slider y selección de cultivos/malezas.
+* **Estado**: COMPLETADO

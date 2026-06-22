@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Variables para calibración
     let isCalibrating = false;
+    let isCalibrated = false;
     let calibrationMessageTimer = 0;
 
     // --- Inicialización del Reloj ---
@@ -214,10 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCalib = document.getElementById('btn-calibration');
     btnCalib.addEventListener('click', () => {
         isCalibrating = true;
+        isCalibrated = false;
         calibrationMessageTimer = 180; // 3 segundos a 60fps
         game.initAudio();
         game.playSuccessSound();
-        game.logToConsole("Calibración del sensor de cámara completada.", "info");
+        game.logToConsole("Iniciando calibración del sensor de cámara...", "info");
     });
 
     // --- Interacción con el Visor (Clic con Ratón) ---
@@ -243,9 +245,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Limpiar Canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // 2. Pintar frame de la cámara
+        // 2. Pintar frame de la cámara con filtros de procesamiento dinámicos (GPU-accelerated)
         if (currentImage.complete && currentImage.src) {
+            ctx.save();
+            if (isCalibrating && calibrationMessageTimer > 0) {
+                // Simular auto-exposición e histograma dinámico mediante oscilación
+                const osc = Math.sin(calibrationMessageTimer * 0.15);
+                const brightnessVal = 1.0 + osc * 0.15;
+                const contrastVal = 1.35 + osc * 0.25;
+                ctx.filter = `brightness(${brightnessVal}) contrast(${contrastVal}) saturate(1.2) grayscale(0.15)`;
+            } else if (isCalibrated) {
+                // Calibrado: Normalización del histograma simulado (más nítido y saturado)
+                ctx.filter = 'contrast(1.15) brightness(1.05) saturate(1.1)';
+            }
             ctx.drawImage(currentImage, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
         } else {
             // Fondo por defecto antes de conectar
             ctx.fillStyle = '#07080a';
@@ -279,7 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const h = y2 - y1;
             
             // Elegir estilo según clase
-            let color = '#ff3b30'; // Rojo Maleza
+            let color = getComputedStyle(document.body).getPropertyValue('--color-target').trim() || '#ff3b30'; // Dinámico según tema activo
             let labelText = `MAL: MALEZA`;
             
             if (det.class === 'manzana') {
@@ -323,7 +337,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.stroke();
             
             // Dibujar caja de fondo muy suave para el área
-            ctx.fillStyle = color === '#00ff88' ? 'rgba(0, 255, 136, 0.03)' : 'rgba(255, 59, 48, 0.03)';
+            ctx.fillStyle = det.class === 'manzana' 
+                ? 'rgba(0, 255, 136, 0.03)' 
+                : (getComputedStyle(document.body).getPropertyValue('--color-target-bg').trim() || 'rgba(255, 59, 48, 0.03)');
             ctx.fillRect(x1, y1, w, h);
             
             // Etiqueta del modelo
@@ -382,6 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
             calibrationMessageTimer--;
             if (calibrationMessageTimer <= 0) {
                 isCalibrating = false;
+                isCalibrated = true;
+                game.logToConsole("Calibración del sensor de cámara completada con éxito.", "success");
+                game.logToConsole("Filtro de normalización de contraste e iluminación activo.", "info");
             }
         }
         

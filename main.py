@@ -37,6 +37,14 @@ async def get_index():
             return HTMLResponse(content=f.read())
     return HTMLResponse(content="<h1>Error: static/index.html no encontrado.</h1>")
 
+@app.get("/simulation", response_class=HTMLResponse)
+async def get_simulation():
+    sim_path = os.path.join("static", "simulation.html")
+    if os.path.exists(sim_path):
+        with open(sim_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>Error: static/simulation.html no encontrado.</h1>")
+
 @app.get("/health")
 async def health():
     import torch
@@ -106,10 +114,10 @@ async def websocket_endpoint(websocket: WebSocket):
                     },
                     {
                         "box": [
-                            camera.sim_dandelion_x - 22,
-                            camera.sim_dandelion_y - 22,
-                            camera.sim_dandelion_x + 22,
-                            camera.sim_dandelion_y + 22
+                            camera.sim_weed_x - 30,
+                            camera.sim_weed_y - 30,
+                            camera.sim_weed_x + 30,
+                            camera.sim_weed_y + 30
                         ],
                         "class": "maleza",
                         "confidence": 0.95

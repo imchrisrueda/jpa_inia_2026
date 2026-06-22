@@ -13,13 +13,16 @@ class VideoCamera:
         self.thread = None
         self.is_dummy = False
         
-        # Parámetros para la animación en modo simulado
+        # Parámetros para la animación en modo simulado (con movimiento aleatorio bidireccional)
         self.sim_apple_x = 150
         self.sim_apple_y = 240
-        self.sim_apple_dx = 2
-        self.sim_dandelion_x = 450
-        self.sim_dandelion_y = 240
-        self.sim_dandelion_dy = 3
+        self.sim_apple_dx = 2.0
+        self.sim_apple_dy = 1.0
+        
+        self.sim_weed_x = 450
+        self.sim_weed_y = 240
+        self.sim_weed_dx = -2.0
+        self.sim_weed_dy = 1.5
 
     def start(self):
         if self.is_running:
@@ -78,24 +81,55 @@ class VideoCamera:
         for y in range(0, 480, 40):
             cv2.line(frame, (0, y), (640, y), (40, 60, 30), 1)
             
-        # Actualizar posiciones
-        self.sim_apple_x += self.sim_apple_dx
-        if self.sim_apple_x < 50 or self.sim_apple_x > 300:
-            self.sim_apple_dx *= -1
+        # Actualizar posiciones de la manzana con velocidad aleatoria suave (Random Walk)
+        self.sim_apple_dx += np.random.uniform(-0.4, 0.4)
+        self.sim_apple_dy += np.random.uniform(-0.4, 0.4)
+        self.sim_apple_dx = np.clip(self.sim_apple_dx, -3, 3)
+        self.sim_apple_dy = np.clip(self.sim_apple_dy, -3, 3)
+        
+        self.sim_apple_x += int(round(self.sim_apple_dx))
+        self.sim_apple_y += int(round(self.sim_apple_dy))
+        
+        # Rebotar en límites (mitad izquierda)
+        if self.sim_apple_x < 50 or self.sim_apple_x > 280:
+            self.sim_apple_dx *= -1.0
+            self.sim_apple_x = int(np.clip(self.sim_apple_x, 50, 280))
+        if self.sim_apple_y < 50 or self.sim_apple_y > 430:
+            self.sim_apple_dy *= -1.0
+            self.sim_apple_y = int(np.clip(self.sim_apple_y, 50, 430))
             
-        self.sim_dandelion_y += self.sim_dandelion_dy
-        if self.sim_dandelion_y < 50 or self.sim_dandelion_y > 430:
-            self.sim_dandelion_dy *= -1
+        # Actualizar posiciones de la mala hierba con velocidad aleatoria suave
+        self.sim_weed_dx += np.random.uniform(-0.4, 0.4)
+        self.sim_weed_dy += np.random.uniform(-0.4, 0.4)
+        self.sim_weed_dx = np.clip(self.sim_weed_dx, -3, 3)
+        self.sim_weed_dy = np.clip(self.sim_weed_dy, -3, 3)
+        
+        self.sim_weed_x += int(round(self.sim_weed_dx))
+        self.sim_weed_y += int(round(self.sim_weed_dy))
+        
+        # Rebotar en límites (mitad derecha)
+        if self.sim_weed_x < 340 or self.sim_weed_x > 590:
+            self.sim_weed_dx *= -1.0
+            self.sim_weed_x = int(np.clip(self.sim_weed_x, 340, 590))
+        if self.sim_weed_y < 50 or self.sim_weed_y > 430:
+            self.sim_weed_dy *= -1.0
+            self.sim_weed_y = int(np.clip(self.sim_weed_y, 50, 430))
             
         # Dibujar cultivo (manzana roja)
-        cv2.line(frame, (self.sim_apple_x, self.sim_apple_y - 35), (self.sim_apple_x + 5, self.sim_apple_y - 25), (20, 70, 100), 3)
-        cv2.circle(frame, (self.sim_apple_x, self.sim_apple_y), 25, (31, 7, 175), -1) # Color CSIC Rojo
-        cv2.circle(frame, (self.sim_apple_x - 8, self.sim_apple_y - 8), 6, (100, 100, 255), -1)
+        # Tallo
+        cv2.line(frame, (self.sim_apple_x, self.sim_apple_y - 25), (self.sim_apple_x + 5, self.sim_apple_y - 35), (20, 70, 100), 3)
+        # Cuerpo principal (Rojo manzana)
+        cv2.circle(frame, (self.sim_apple_x, self.sim_apple_y), 24, (40, 40, 240), -1)
+        # Brillo
+        cv2.circle(frame, (self.sim_apple_x - 7, self.sim_apple_y - 7), 5, (100, 100, 255), -1)
         
-        # Dibujar maleza (diente de león amarillo/verde)
-        cv2.ellipse(frame, (self.sim_dandelion_x, self.sim_dandelion_y), (20, 8), 45, 0, 360, (50, 150, 50), -1)
-        cv2.ellipse(frame, (self.sim_dandelion_x, self.sim_dandelion_y), (20, 8), -45, 0, 360, (50, 150, 50), -1)
-        cv2.circle(frame, (self.sim_dandelion_x, self.sim_dandelion_y), 15, (0, 220, 255), -1)
+        # Dibujar mala hierba (bad weed / spikey grass)
+        cv2.ellipse(frame, (self.sim_weed_x, self.sim_weed_y), (25, 8), 15, 0, 360, (30, 110, 30), -1)
+        cv2.ellipse(frame, (self.sim_weed_x, self.sim_weed_y), (25, 8), -15, 0, 360, (30, 110, 30), -1)
+        cv2.ellipse(frame, (self.sim_weed_x, self.sim_weed_y), (25, 8), 90, 0, 360, (35, 130, 35), -1)
+        cv2.ellipse(frame, (self.sim_weed_x, self.sim_weed_y), (20, 6), 45, 0, 360, (40, 150, 40), -1)
+        cv2.ellipse(frame, (self.sim_weed_x, self.sim_weed_y), (20, 6), -45, 0, 360, (40, 150, 40), -1)
+        cv2.circle(frame, (self.sim_weed_x, self.sim_weed_y), 8, (20, 80, 20), -1)
         
         # Texto indicador de simulación
         cv2.putText(frame, "MODO SIMULACION ACTIVO", (15, 30), 

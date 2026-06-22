@@ -10,14 +10,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
+<body class="theme-inia">
     <!-- Pantalla de Bienvenida / Activación de Audio -->
     <div id="start-screen" class="overlay">
         <div class="welcome-box">
             <div class="logo-container">
                 <span class="logo-accent">CROP</span><span class="logo-main">SHIELD</span><span class="logo-ai">AI</span>
             </div>
-            <p class="subtitle">Showcase Tecnológico de Agricultura de Precisión en Tiempo Real</p>
+            <p class="subtitle">Agricultura de Precisión en Acción</p>
             <div class="logos-institution">
                 <span class="inst-tag inia">INIA</span>
                 <span class="inst-separator">|</span>
@@ -26,6 +26,10 @@
             <button id="btn-start" class="btn-primary">INICIAR SISTEMA DE DEFENSA</button>
             <p class="disclaimer">Requiere acceso a la cámara web. Si no se detecta cámara física, se activará el simulador.</p>
         </div>
+        <!-- Pie de página de la pantalla de inicio con logo obligatorio -->
+        <footer class="overlay-footer">
+            <img src="/static/assets/imgs/min_csic_inia_logo.png" alt="Logotipos Institucionales" class="footer-logo">
+        </footer>
     </div>
 
     <!-- HUD Principal de Cabina Dron / Robótica -->
@@ -33,6 +37,7 @@
         <!-- Cabecera HUD -->
         <header class="hud-header">
             <div class="header-left">
+                <img src="/static/assets/imgs/DIG4AGRO_logo.svg" alt="DIG4AGRO Logo" class="header-brand-logo">
                 <div class="logo-small">CROP<span>SHIELD</span></div>
                 <div class="status-indicator">
                     <span class="pulse-dot"></span>
@@ -41,7 +46,7 @@
             </div>
             
             <div class="header-center">
-                <div class="title-showcase">DEMOSTRADOR DE AGRICULTURA DE PRECISIÓN</div>
+                <div class="title-showcase">AGRICULTURA DE PRECISIÓN</div>
             </div>
 
             <div class="header-right">
@@ -191,14 +196,16 @@
                 <!-- Botones de Acción -->
                 <div class="action-buttons">
                     <button id="btn-calibration" class="btn-secondary">CALIBRAR ENTORNO</button>
+                    <a href="/simulation" style="text-decoration: none; width: 100%; display: block;">
+                        <button class="btn-secondary" style="border-color: var(--color-primary); color: var(--color-primary); background: var(--color-primary-alpha-05); font-weight: 750;">EXPLICADOR IA (CÓMO VE YOLO)</button>
+                    </a>
                 </div>
             </section>
         </div>
 
         <!-- Pie de página corporativo -->
         <footer class="hud-footer">
-            <div class="footer-left">INIA - Instituto Nacional de Investigación y Tecnología Agraria y Alimentaria</div>
-            <div class="footer-right">CSIC - Consejo Superior de Investigaciones Científicas</div>
+            <img src="/static/assets/imgs/min_csic_inia_logo.png" alt="Logotipos Institucionales" class="footer-logo">
         </footer>
     </div>
     
