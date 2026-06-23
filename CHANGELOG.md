@@ -2,6 +2,38 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [1.4.1] - 2026-06-23
+
+### Corregido
+- **Prevención de congelamiento del visor**: Se agregaron comprobaciones de dimensiones (`naturalWidth > 0`) y bloques `try...catch` en todas las operaciones de dibujo de imágenes (`drawImage`) del explicador. Esto evita que cargas fallidas o corruptas de base64 detengan el bucle principal de renderizado (`requestAnimationFrame`).
+- **Compatibilidad con protocolo local**: Implementación de fallback automático del WebSocket a la dirección `ws://127.0.0.1:8000/ws` si la página es abierta directamente desde el sistema de archivos local (`file://`), impidiendo un error de sintaxis al inicializar la conexión.
+- **Robustez ante detecciones parciales**: Comprobación estricta de tipo `Array.isArray()` y de la existencia del vector `box` en el bucle de renderizado de bounding boxes, evitando excepciones `TypeError`.
+- **Estabilidad de Canvas y Geometría**: Protección mediante `Math.abs` y validación de radio estrictamente mayor a 0 en las funciones `arc` y `ellipse`, evitando excepciones de tipo `IndexSizeError` en navegadores estrictos.
+- **Control defensivo de audio**: Envoltura en bloques `try...catch` de las operaciones con `AudioContext` para omitir excepciones en navegadores con políticas de autoplay restrictivas.
+
+## [1.4.0] - 2026-06-23
+
+### Añadido
+- Integración de **Cámara en Vivo** en el Explicador del Modelo (`simulation.html`) para permitir el análisis didáctico de la señal de vídeo real.
+- **10 Filtros Convolucionales Interactivos** que simulan la jerarquía profunda de extracción de características en una CNN (como YOLOv8):
+  1. *Bordes Verticales (Sobel-V)*: Capa Temprana.
+  2. *Bordes Horizontales (Sobel-H)*: Capa Temprana.
+  3. *Orientación Diagonal (45°)*: Capa Temprana.
+  4. *Esquinas y Vértices (Laplaciano)*: Capa Temprana.
+  5. *Espectro Rojo (Manzana/Cultivo)*: Capa Intermedia.
+  6. *Espectro Amarillo/Verde (Banana/Maleza)*: Capa Intermedia.
+  7. *Textura y Relieve del Follaje*: Capa Intermedia.
+  8. *Patrón de Silueta Circular*: Capa Profunda.
+  9. *Patrón de Silueta Alargada*: Capa Profunda.
+  10. *Atención Final (Heatmap / Grad-CAM)*: Capa de Decisión.
+- Conectividad WebSocket bidireccional directa desde el Explicador IA hacia `/ws` para sincronizar frames de vídeo y bounding boxes en tiempo real.
+- Procesamiento en paralelo de convoluciones en el frontend utilizando un canvas temporal oculto de baja resolución (200x150) con renderizado final ampliado retro-pixelado, logrando tasas de fotogramas estables (>30 FPS / 60 FPS) sin sobrecargar el hardware.
+- Activación reactiva del flujo de la red neuronal animada y propagación de sinapsis según las detecciones de la cámara en vivo.
+- Cuadrícula (Grid cells) y predicciones antes/después de NMS aplicadas en tiempo real al feed de vídeo.
+
+### Cambiado
+- Barra de scroll vertical adaptada con estilos INIA/CSIC de color primary translúcido en el panel de tarjetas de características.
+
 ## [1.3.0] - 2026-06-22
 
 ### Añadido

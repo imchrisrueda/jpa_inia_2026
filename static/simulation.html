@@ -52,6 +52,15 @@
                         <span class="option-sub" style="font-size: 0.65rem; color: var(--color-rojo-neon); display: block; margin-top: 3px;">(MALEZA)</span>
                     </div>
                 </div>
+                <div style="margin-top: 12px;">
+                    <div class="input-option-card" id="opt-camera" data-value="camera" style="display: flex; align-items: center; justify-content: center; gap: 15px; padding: 12px 15px;">
+                        <span class="option-icon" style="font-size: 1.6rem; margin-bottom: 0; line-height: 1;">📷</span>
+                        <div style="text-align: left;">
+                            <span class="option-label" style="display: block; font-size: 0.75rem;">CÁMARA EN VIVO</span>
+                            <span class="option-sub" style="font-size: 0.6rem; color: var(--color-cyan); display: block; margin-top: 2px;">(DETECCIÓN REAL)</span>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Escáner Holográfico del Objeto -->
                 <div class="control-group" style="margin-top: 10px;">
@@ -168,35 +177,117 @@
                                 <canvas id="canvas-feature-zoom" class="yolo-viewer-canvas" width="450" height="450"></canvas>
                             </div>
                             
-                            <!-- Lista de mapas -->
                             <div class="feature-cards-container">
-                                <div class="feature-map-card active" id="fcard-edge" data-map="edge">
+                                <!-- Capas Tempranas -->
+                                <div class="feature-map-card active" id="fcard-sobel-v" data-map="sobel-v">
                                     <div class="feature-map-canvas-wrapper">
-                                        <canvas class="feature-map-canvas" id="canvas-fmap-edge" width="100" height="100"></canvas>
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-sobel-v" width="100" height="100"></canvas>
                                     </div>
                                     <div class="feature-info">
-                                        <h4>DETECTOR DE BORDES Y CONTORNOS</h4>
-                                        <p>Simula las capas convolucionales tempranas de YOLO, que detectan siluetas, orientaciones de relieve y contornos geométricos del objeto para aislarlo de la tierra.</p>
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(0, 243, 255, 0.15); color: var(--color-cyan);">TEMPRANA</span>
+                                        <h4>BORDES VERTICALES (SOBEL-V)</h4>
+                                        <p>Detecta contornos alineados verticalmente. Útil en las primeras etapas de convolución para perfilar siluetas y tallos verticales.</p>
                                     </div>
                                 </div>
                                 
-                                <div class="feature-map-card" id="fcard-color" data-map="color">
+                                <div class="feature-map-card" id="fcard-sobel-h" data-map="sobel-h">
                                     <div class="feature-map-canvas-wrapper">
-                                        <canvas class="feature-map-canvas" id="canvas-fmap-color" width="100" height="100"></canvas>
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-sobel-h" width="100" height="100"></canvas>
                                     </div>
                                     <div class="feature-info">
-                                        <h4>DETECTOR DE TEXTURA Y COLOR ACTIVADO</h4>
-                                        <p>Representa capas intermedias que detectan propiedades cromáticas clave: el espectro rojo para la manzana y el espectro amarillo brillante para la banana.</p>
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(0, 243, 255, 0.15); color: var(--color-cyan);">TEMPRANA</span>
+                                        <h4>BORDES HORIZONTALES (SOBEL-H)</h4>
+                                        <p>Filtra y resalta bordes horizontales. Ayuda a discriminar los límites de parcelas y las líneas horizontales del suelo.</p>
                                     </div>
                                 </div>
-                                
+
+                                <div class="feature-map-card" id="fcard-diagonal" data-map="diagonal">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-diagonal" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(0, 243, 255, 0.15); color: var(--color-cyan);">TEMPRANA</span>
+                                        <h4>ORIENTACIÓN DIAGONAL (45°)</h4>
+                                        <p>Extrae texturas y límites con inclinación de 45°. Crucial para identificar hojas de malezas que crecen en direcciones aleatorias.</p>
+                                    </div>
+                                </div>
+
+                                <div class="feature-map-card" id="fcard-laplacian" data-map="laplacian">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-laplacian" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(0, 243, 255, 0.15); color: var(--color-cyan);">TEMPRANA</span>
+                                        <h4>ESQUINAS Y VÉRTICES (LAPLACIANO)</h4>
+                                        <p>Aísla puntos, esquinas cerradas e intersecciones de hojas. Captura detalles geométricos muy finos de alta frecuencia espacial.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Capas Intermedias -->
+                                <div class="feature-map-card" id="fcard-color-red" data-map="color-red">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-color-red" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(35, 156, 66, 0.2); color: var(--color-primary);">INTERMEDIA</span>
+                                        <h4>ESPECTRO ROJO (CULTIVO)</h4>
+                                        <p>Filtro que reacciona con la crominancia roja de los frutos (manzanas). Ignora el fondo verde y el suelo de cultivo.</p>
+                                    </div>
+                                </div>
+
+                                <div class="feature-map-card" id="fcard-color-greenyellow" data-map="color-greenyellow">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-color-greenyellow" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(35, 156, 66, 0.2); color: var(--color-primary);">INTERMEDIA</span>
+                                        <h4>ESPECTRO AMARILLO/VERDE (MALEZA)</h4>
+                                        <p>Reacciona con tonos verde-amarillentos de alta saturación característicos de las hojas de malezas invasoras.</p>
+                                    </div>
+                                </div>
+
+                                <div class="feature-map-card" id="fcard-texture" data-map="texture">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-texture" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(35, 156, 66, 0.2); color: var(--color-primary);">INTERMEDIA</span>
+                                        <h4>TEXTURA DE FOLLAJE Y RUGOSIDAD</h4>
+                                        <p>Filtro de paso alto que aísla patrones de textura fina (como la rugosidad de las hojas y la tierra), ignorando zonas homogéneas.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Capas Profundas -->
+                                <div class="feature-map-card" id="fcard-shape-circle" data-map="shape-circle">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-shape-circle" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(255, 59, 48, 0.15); color: var(--color-rojo-neon);">PROFUNDA</span>
+                                        <h4>PATRÓN DE SILUETA CIRCULAR</h4>
+                                        <p>Capa profunda abstracta que se activa intensamente ante contornos esféricos, identificando frutos redondos listos para la cosecha.</p>
+                                    </div>
+                                </div>
+
+                                <div class="feature-map-card" id="fcard-shape-elong" data-map="shape-elong">
+                                    <div class="feature-map-canvas-wrapper">
+                                        <canvas class="feature-map-canvas" id="canvas-fmap-shape-elong" width="100" height="100"></canvas>
+                                    </div>
+                                    <div class="feature-info">
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(255, 59, 48, 0.15); color: var(--color-rojo-neon);">PROFUNDA</span>
+                                        <h4>PATRÓN DE SILUETA ALARGADA</h4>
+                                        <p>Capa profunda abstracta que busca patrones alargados, angulosos e irregulares característicos de hierbas parasitarias.</p>
+                                    </div>
+                                </div>
+
                                 <div class="feature-map-card" id="fcard-heatmap" data-map="heatmap">
                                     <div class="feature-map-canvas-wrapper">
                                         <canvas class="feature-map-canvas" id="canvas-fmap-heatmap" width="100" height="100"></canvas>
                                     </div>
                                     <div class="feature-info">
-                                        <h4>MAPA DE ATENCIÓN DE INFERENCIA (HEATMAP)</h4>
-                                        <p>Visualiza la importancia que asigna la red a cada pixel de la imagen (Grad-CAM) para tomar su decisión final, ignorando los pixeles neutros del suelo de cultivo.</p>
+                                        <span class="step-number" style="font-size: 0.65rem; padding: 2px 6px; float: right; background: rgba(255, 59, 48, 0.15); color: var(--color-rojo-neon);">RESOLUCIÓN</span>
+                                        <h4>ATENCIÓN FINAL (HEATMAP / GRAD-CAM)</h4>
+                                        <p>Visualiza las zonas de mayor ponderación neuronal en las que la red enfoca su atención lógica antes de dar la predicción y fijar el láser.</p>
                                     </div>
                                 </div>
                             </div>
@@ -217,11 +308,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Variables globales del simulador
-            let activeInput = 'apple'; // 'apple' o 'banana'
+            let activeInput = 'apple'; // 'apple', 'banana' o 'camera'
             let confidenceThreshold = 0.35;
             let activeTab = 'tab-yolo-pipeline';
             let activeStep = 0; // Para el pipeline
-            let activeFeatureMap = 'edge'; // Para los mapas de características
+            let activeFeatureMap = 'sobel-v'; // Para los mapas de características (por defecto Sobel-V)
             
             // Colores del tema actual
             const themeColors = {
@@ -233,27 +324,104 @@
                 bg: '#070908'
             };
 
+            // Conectividad WebSocket para la cámara real/simulada
+            let ws = null;
+            let currentCameraFrame = null;
+            let currentDetections = [];
+            
+            function connectWebSocket() {
+                try {
+                    let wsUrl;
+                    if (window.location.protocol === 'file:') {
+                        wsUrl = 'ws://127.0.0.1:8000/ws';
+                        console.log("[Explicador] Protocolo file:// detectado. Usando fallback local ws://127.0.0.1:8000/ws");
+                    } else {
+                        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                        wsUrl = `${protocol}//${window.location.host}/ws`;
+                    }
+                    
+                    console.log(`[Explicador] Conectando WebSocket en ${wsUrl}...`);
+                    ws = new WebSocket(wsUrl);
+                    
+                    ws.onopen = () => {
+                        console.log("[Explicador] WebSocket conectado.");
+                        sendConfig();
+                    };
+                    
+                    ws.onmessage = (event) => {
+                        try {
+                            const payload = JSON.parse(event.data);
+                            if (payload.image) {
+                                if (!currentCameraFrame) {
+                                    currentCameraFrame = new Image();
+                                }
+                                currentCameraFrame.src = payload.image;
+                            }
+                            if (payload.detections !== undefined) {
+                                currentDetections = Array.isArray(payload.detections) ? payload.detections : [];
+                            }
+                        } catch (e) {
+                            console.error("[Explicador] Error decodificando payload:", e);
+                        }
+                    };
+                    
+                    ws.onclose = () => {
+                        console.warn("[Explicador] WebSocket cerrado. Reconectando en 3s...");
+                        setTimeout(connectWebSocket, 3000);
+                    };
+                    
+                    ws.onerror = (err) => {
+                        console.error("[Explicador] Error en WebSocket:", err);
+                    };
+                } catch (e) {
+                    console.error("[Explicador] Error al inicializar WebSocket:", e);
+                    setTimeout(connectWebSocket, 5000);
+                }
+            }
+            
+            function sendConfig() {
+                try {
+                    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+                    ws.send(JSON.stringify({
+                        "conf_threshold": confidenceThreshold,
+                        "simulate": false
+                    }));
+                } catch (e) {
+                    console.error("[Explicador] Error enviando configuración:", e);
+                }
+            }
+            
+            connectWebSocket();
+
             // Audio Context y síntesis
             let audioCtx = null;
             function initAudio() {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                try {
+                    if (!audioCtx) {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                } catch (e) {
+                    console.warn("[Explicador] AudioContext no iniciado o no soportado:", e);
                 }
             }
 
             function playClickSound() {
                 if (!audioCtx) return;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.05);
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                } catch (e) {
+                    console.warn("[Explicador] Error reproduciendo sonido de clic:", e);
+                }
             }
 
             // Inicializar Audio al interactuar con cualquier botón
@@ -264,23 +432,31 @@
             // Configuración del Selector de Entrada
             const optApple = document.getElementById('opt-apple');
             const optBanana = document.getElementById('opt-banana');
+            const optCamera = document.getElementById('opt-camera');
 
             function setInputObject(obj) {
                 if (activeInput === obj) return;
                 activeInput = obj;
+                
+                optApple.classList.remove('active');
+                optBanana.classList.remove('active');
+                optCamera.classList.remove('active');
+                
                 if (obj === 'apple') {
                     optApple.classList.add('active');
-                    optBanana.classList.remove('active');
-                } else {
+                } else if (obj === 'banana') {
                     optBanana.classList.add('active');
-                    optApple.classList.remove('active');
+                } else if (obj === 'camera') {
+                    optCamera.classList.add('active');
                 }
+                
                 playClickSound();
                 resetSimulations();
             }
 
             optApple.addEventListener('click', () => setInputObject('apple'));
             optBanana.addEventListener('click', () => setInputObject('banana'));
+            optCamera.addEventListener('click', () => setInputObject('camera'));
 
             // Slider de Confianza
             const sliderConf = document.getElementById('sim-slider-conf');
@@ -288,6 +464,7 @@
             sliderConf.addEventListener('input', (e) => {
                 confidenceThreshold = e.target.value / 100;
                 valConf.innerText = `${e.target.value}%`;
+                sendConfig();
             });
 
             // Control de Pestañas (Tabs)
@@ -351,14 +528,26 @@
             const canvasFeatureZoom = document.getElementById('canvas-feature-zoom');
             const ctxFeatureZoom = canvasFeatureZoom.getContext('2d');
 
-            const canvasFmapEdge = document.getElementById('canvas-fmap-edge');
-            const ctxFmapEdge = canvasFmapEdge.getContext('2d');
+            // Los 10 canvases de mapas de características en miniatura
+            const fmapCanvases = {
+                'sobel-v': document.getElementById('canvas-fmap-sobel-v'),
+                'sobel-h': document.getElementById('canvas-fmap-sobel-h'),
+                'diagonal': document.getElementById('canvas-fmap-diagonal'),
+                'laplacian': document.getElementById('canvas-fmap-laplacian'),
+                'color-red': document.getElementById('canvas-fmap-color-red'),
+                'color-greenyellow': document.getElementById('canvas-fmap-color-greenyellow'),
+                'texture': document.getElementById('canvas-fmap-texture'),
+                'shape-circle': document.getElementById('canvas-fmap-shape-circle'),
+                'shape-elong': document.getElementById('canvas-fmap-shape-elong'),
+                'heatmap': document.getElementById('canvas-fmap-heatmap')
+            };
 
-            const canvasFmapColor = document.getElementById('canvas-fmap-color');
-            const ctxFmapColor = canvasFmapColor.getContext('2d');
-
-            const canvasFmapHeatmap = document.getElementById('canvas-fmap-heatmap');
-            const ctxFmapHeatmap = canvasFmapHeatmap.getContext('2d');
+            const fmapContexts = {};
+            for (const [key, canvas] of Object.entries(fmapCanvases)) {
+                if (canvas) {
+                    fmapContexts[key] = canvas.getContext('2d');
+                }
+            }
 
             // Ajustar el tamaño del Canvas Blueprint
             function resizeBlueprintCanvas() {
@@ -550,19 +739,43 @@
                 ctxBlueprint.lineTo(lx, ly);
                 ctxBlueprint.stroke();
 
-                // Dibujar objeto en wireframe
+                // Dibujar objeto en wireframe o stream de cámara
                 if (activeInput === 'apple') {
                     drawApple(ctxBlueprint, cx, cy, 38, true);
                     ctxBlueprint.fillStyle = '#00f3ff';
                     ctxBlueprint.font = '10px Share Tech Mono';
                     ctxBlueprint.fillText("SCANNING: CROP [APPLE]", 10, h - 15);
                     ctxBlueprint.fillText("SHAPE: SPHERICAL", 10, 20);
-                } else {
+                } else if (activeInput === 'banana') {
                     drawBanana(ctxBlueprint, cx, cy, 35, true);
                     ctxBlueprint.fillStyle = '#00f3ff';
                     ctxBlueprint.font = '10px Share Tech Mono';
                     ctxBlueprint.fillText("SCANNING: WEED [BANANA]", 10, h - 15);
                     ctxBlueprint.fillText("SHAPE: ELONGATED", 10, 20);
+                } else if (activeInput === 'camera') {
+                    if (currentCameraFrame && currentCameraFrame.complete && currentCameraFrame.naturalWidth > 0) {
+                        ctxBlueprint.save();
+                        try {
+                            ctxBlueprint.drawImage(currentCameraFrame, 0, 0, w, h);
+                        } catch (e) {
+                            console.warn("[Explicador] Error dibujando frame en Blueprint:", e);
+                        }
+                        ctxBlueprint.fillStyle = 'rgba(0, 243, 255, 0.15)';
+                        ctxBlueprint.fillRect(0, 0, w, h);
+                        ctxBlueprint.restore();
+                    } else {
+                        ctxBlueprint.fillStyle = '#070908';
+                        ctxBlueprint.fillRect(0, 0, w, h);
+                        ctxBlueprint.fillStyle = '#A2AAAD';
+                        ctxBlueprint.font = '10px Share Tech Mono';
+                        ctxBlueprint.textAlign = 'center';
+                        ctxBlueprint.fillText("ESPERANDO CÁMARA...", w / 2, h / 2);
+                        ctxBlueprint.textAlign = 'left';
+                    }
+                    ctxBlueprint.fillStyle = '#00f3ff';
+                    ctxBlueprint.font = '10px Share Tech Mono';
+                    ctxBlueprint.fillText("SCANNING: LIVE VIDEO", 10, h - 15);
+                    ctxBlueprint.fillText("MODE: DYNAMIC INF", 10, 20);
                 }
 
                 // Punto parpadeante
@@ -593,15 +806,31 @@
                 const objY = h / 2;
                 const objSize = 65;
 
-                // Fondo
-                ctxYolo.fillStyle = '#090a0f';
-                ctxYolo.fillRect(0, 0, w, h);
-
-                // Dibujar el objeto según el input
+                // Fondo u objeto
                 if (activeInput === 'apple') {
+                    ctxYolo.fillStyle = '#090a0f';
+                    ctxYolo.fillRect(0, 0, w, h);
                     drawApple(ctxYolo, objX, objY, objSize, false);
-                } else {
+                } else if (activeInput === 'banana') {
+                    ctxYolo.fillStyle = '#090a0f';
+                    ctxYolo.fillRect(0, 0, w, h);
                     drawBanana(ctxYolo, objX, objY, objSize, false);
+                } else if (activeInput === 'camera') {
+                    if (currentCameraFrame && currentCameraFrame.complete && currentCameraFrame.naturalWidth > 0) {
+                        try {
+                            ctxYolo.drawImage(currentCameraFrame, 0, 0, w, h);
+                        } catch (e) {
+                            console.warn("[Explicador] Error dibujando frame en YoloPipeline:", e);
+                        }
+                    } else {
+                        ctxYolo.fillStyle = '#090a0f';
+                        ctxYolo.fillRect(0, 0, w, h);
+                        ctxYolo.fillStyle = '#ffffff';
+                        ctxYolo.font = '14px Orbitron';
+                        ctxYolo.textAlign = 'center';
+                        ctxYolo.fillText("ESPERANDO SEÑAL DE CÁMARA...", w / 2, h / 2);
+                        ctxYolo.textAlign = 'left';
+                    }
                 }
 
                 // Dibujar según el paso activo
@@ -610,7 +839,7 @@
                     const cellW = w / gridCount;
                     const cellH = h / gridCount;
 
-                    ctxYolo.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                    ctxYolo.strokeStyle = 'rgba(255, 255, 255, 0.25)';
                     ctxYolo.lineWidth = 1;
 
                     for (let i = 1; i < gridCount; i++) {
@@ -625,23 +854,47 @@
                         ctxYolo.stroke();
                     }
 
-                    const targetCol = Math.floor(objX / cellW);
-                    const targetRow = Math.floor(objY / cellH);
+                    if (activeInput === 'camera' && Array.isArray(currentDetections)) {
+                        currentDetections.forEach(det => {
+                            if (!det || !det.box || det.box.length < 4) return;
+                            const [x1, y1, x2, y2] = det.box;
+                            const cx = (x1 + x2) / 2;
+                            const cy = (y1 + y2) / 2;
+                            const col = Math.floor(cx / (640 / gridCount));
+                            const row = Math.floor(cy / (480 / gridCount));
 
-                    ctxYolo.fillStyle = 'rgba(35, 156, 66, 0.25)';
-                    ctxYolo.fillRect(targetCol * cellW, targetRow * cellH, cellW, cellH);
-                    ctxYolo.strokeStyle = themeColors.primary;
-                    ctxYolo.lineWidth = 2;
-                    ctxYolo.strokeRect(targetCol * cellW, targetRow * cellH, cellW, cellH);
+                            if (col >= 0 && col < gridCount && row >= 0 && row < gridCount) {
+                                ctxYolo.fillStyle = det.class === 'manzana' ? 'rgba(0, 255, 136, 0.25)' : 'rgba(255, 59, 48, 0.25)';
+                                ctxYolo.fillRect(col * cellW, row * cellH, cellW, cellH);
+                                ctxYolo.strokeStyle = det.class === 'manzana' ? themeColors.verde : themeColors.rojo;
+                                ctxYolo.lineWidth = 2;
+                                ctxYolo.strokeRect(col * cellW, row * cellH, cellW, cellH);
 
-                    ctxYolo.beginPath();
-                    ctxYolo.arc(targetCol * cellW + cellW/2, targetRow * cellH + cellH/2, 6, 0, Math.PI*2);
-                    ctxYolo.fillStyle = themeColors.primary;
-                    ctxYolo.fill();
+                                ctxYolo.beginPath();
+                                ctxYolo.arc(col * cellW + cellW/2, row * cellH + cellH/2, 6, 0, Math.PI*2);
+                                ctxYolo.fillStyle = det.class === 'manzana' ? themeColors.verde : themeColors.rojo;
+                                ctxYolo.fill();
+                            }
+                        });
+                    } else {
+                        const targetCol = Math.floor(objX / cellW);
+                        const targetRow = Math.floor(objY / cellH);
 
-                    ctxYolo.fillStyle = '#ffffff';
-                    ctxYolo.font = '11px Share Tech Mono';
-                    ctxYolo.fillText(`CELDA RESPONSABLE: [Col ${targetCol}, Row ${targetRow}]`, targetCol * cellW - 50, targetRow * cellH - 10);
+                        ctxYolo.fillStyle = 'rgba(35, 156, 66, 0.25)';
+                        ctxYolo.fillRect(targetCol * cellW, targetRow * cellH, cellW, cellH);
+                        ctxYolo.strokeStyle = themeColors.primary;
+                        ctxYolo.lineWidth = 2;
+                        ctxYolo.strokeRect(targetCol * cellW, targetRow * cellH, cellW, cellH);
+
+                        ctxYolo.beginPath();
+                        ctxYolo.arc(targetCol * cellW + cellW/2, targetRow * cellH + cellH/2, 6, 0, Math.PI*2);
+                        ctxYolo.fillStyle = themeColors.primary;
+                        ctxYolo.fill();
+
+                        ctxYolo.fillStyle = '#ffffff';
+                        ctxYolo.font = '11px Share Tech Mono';
+                        ctxYolo.fillText(`CELDA RESPONSABLE: [Col ${targetCol}, Row ${targetRow}]`, targetCol * cellW - 50, targetRow * cellH - 10);
+                    }
                 }
                 else if (activeStep === 1) {
                     const boxes = [];
@@ -649,10 +902,33 @@
                         boxes.push({ x1: objX - 85, y1: objY - 95, w: 170, h: 180, conf: 0.98, label: 'manzana', active: 0.98 >= confidenceThreshold });
                         boxes.push({ x1: objX - 40, y1: objY - 145, w: 90, h: 80, conf: 0.42, label: 'maleza', active: 0.42 >= confidenceThreshold });
                         boxes.push({ x1: objX + 35, y1: objY - 70, w: 70, h: 90, conf: 0.22, label: 'manzana', active: 0.22 >= confidenceThreshold });
-                    } else {
+                    } else if (activeInput === 'banana') {
                         boxes.push({ x1: objX - 95, y1: objY - 100, w: 190, h: 190, conf: 0.95, label: 'maleza', active: 0.95 >= confidenceThreshold });
                         boxes.push({ x1: objX - 140, y1: objY - 30, w: 80, h: 90, conf: 0.38, label: 'maleza', active: 0.38 >= confidenceThreshold });
                         boxes.push({ x1: objX - 30, y1: objY - 130, w: 90, h: 70, conf: 0.18, label: 'manzana', active: 0.18 >= confidenceThreshold });
+                    } else if (activeInput === 'camera' && Array.isArray(currentDetections)) {
+                        currentDetections.forEach(det => {
+                            if (!det || !det.box || det.box.length < 4) return;
+                            const [x1, y1, x2, y2] = det.box;
+                            const sx1 = x1 * (w / 640);
+                            const sy1 = y1 * (h / 480);
+                            const sw = (x2 - x1) * (w / 640);
+                            const sh = (y2 - y1) * (h / 480);
+
+                            boxes.push({
+                                x1: sx1, y1: sy1, w: sw, h: sh,
+                                conf: det.confidence || 0,
+                                label: det.class || 'objeto',
+                                active: (det.confidence || 0) >= confidenceThreshold
+                            });
+                            // Simular anclaje duplicado antes del filtrado
+                            boxes.push({
+                                x1: sx1 - 12, y1: sy1 - 8, w: sw + 24, h: sh + 16,
+                                conf: Math.max(0.1, (det.confidence || 0) - 0.15),
+                                label: det.class || 'objeto',
+                                active: ((det.confidence || 0) - 0.15) >= confidenceThreshold
+                            });
+                        });
                     }
 
                     boxes.forEach(box => {
@@ -684,45 +960,87 @@
                     nmsStepTimer += 0.02;
                     const fade = Math.max(0, 1 - (nmsStepTimer % 2.5) * 0.8);
                     
-                    const isApple = activeInput === 'apple';
-                    const mainConf = isApple ? 0.98 : 0.95;
-                    const secConf = isApple ? 0.86 : 0.81;
-                    const label = isApple ? 'manzana' : 'maleza';
-                    const color = label === 'manzana' ? themeColors.verde : themeColors.rojo;
+                    if (activeInput === 'camera' && Array.isArray(currentDetections)) {
+                        currentDetections.forEach(det => {
+                            if (!det || !det.box || det.box.length < 4) return;
+                            const [x1, y1, x2, y2] = det.box;
+                            const sx1 = x1 * (w / 640);
+                            const sy1 = y1 * (h / 480);
+                            const sw = (x2 - x1) * (w / 640);
+                            const sh = (y2 - y1) * (h / 480);
+                            const color = det.class === 'manzana' ? themeColors.verde : themeColors.rojo;
 
-                    const mainBox = { x1: objX - 85, y1: objY - 95, w: 170, h: 180 };
-                    if (mainConf >= confidenceThreshold) {
-                        ctxYolo.strokeStyle = color;
-                        ctxYolo.lineWidth = 2.5;
-                        ctxYolo.strokeRect(mainBox.x1, mainBox.y1, mainBox.w, mainBox.h);
+                            if ((det.confidence || 0) >= confidenceThreshold) {
+                                // Final Box
+                                ctxYolo.strokeStyle = color;
+                                ctxYolo.lineWidth = 2.5;
+                                ctxYolo.strokeRect(sx1, sy1, sw, sh);
 
-                        ctxYolo.fillStyle = color;
-                        ctxYolo.fillRect(mainBox.x1, mainBox.y1 - 18, 120, 18);
-                        ctxYolo.fillStyle = '#000000';
-                        ctxYolo.font = '700 10px Orbitron';
-                        ctxYolo.fillText(`${label.toUpperCase()} ${(mainConf * 100).toFixed(0)}%`, mainBox.x1 + 5, mainBox.y1 - 5);
-                    }
+                                ctxYolo.fillStyle = color;
+                                ctxYolo.fillRect(sx1, sy1 - 18, 120, 18);
+                                ctxYolo.fillStyle = '#000000';
+                                ctxYolo.font = '700 10px Orbitron';
+                                ctxYolo.fillText(`${(det.class || 'objeto').toUpperCase()} ${((det.confidence || 0) * 100).toFixed(0)}%`, sx1 + 5, sy1 - 5);
 
-                    const secBox = { x1: objX - 70, y1: objY - 80, w: 155, h: 165 };
-                    if (secConf >= confidenceThreshold) {
-                        ctxYolo.strokeStyle = `rgba(${label === 'manzana' ? '0,255,136' : '255,59,48'}, ${fade})`;
-                        ctxYolo.lineWidth = 1.5;
-                        ctxYolo.strokeRect(secBox.x1, secBox.y1, secBox.w, secBox.h);
+                                // Redundant box overlapping
+                                ctxYolo.strokeStyle = `rgba(${det.class === 'manzana' ? '0,255,136' : '255,59,48'}, ${fade})`;
+                                ctxYolo.lineWidth = 1.5;
+                                ctxYolo.strokeRect(sx1 + 10, sy1 + 8, sw - 15, sh - 10);
 
-                        ctxYolo.fillStyle = `rgba(${label === 'manzana' ? '0,255,136' : '255,59,48'}, ${fade})`;
-                        ctxYolo.fillRect(secBox.x1, secBox.y1 - 18, 120, 18);
-                        ctxYolo.fillStyle = `rgba(0,0,0, ${fade})`;
-                        ctxYolo.font = '700 10px Orbitron';
-                        ctxYolo.fillText(`REDUNDANTE ${(secConf * 100).toFixed(0)}%`, secBox.x1 + 5, secBox.y1 - 5);
+                                ctxYolo.fillStyle = `rgba(${det.class === 'manzana' ? '0,255,136' : '255,59,48'}, ${fade})`;
+                                ctxYolo.fillRect(sx1 + 10, sy1 + 8 - 18, 120, 18);
+                                ctxYolo.fillStyle = `rgba(0,0,0, ${fade})`;
+                                ctxYolo.font = '700 10px Orbitron';
+                                ctxYolo.fillText(`SOLAPE ${((det.confidence || 0) * 0.9 * 100).toFixed(0)}%`, sx1 + 15, sy1 + 8 - 5);
+                            }
+                        });
 
-                        ctxYolo.fillStyle = '#00f3ff';
-                        ctxYolo.font = '11px Share Tech Mono';
-                        ctxYolo.fillText(`IoU SOLAPE: 84% > 45% (UMBRAL)`, objX - 80, objY + 110);
-                        ctxYolo.fillText("ELIMINANDO CAJA REDUNDANTE POR NMS...", objX - 100, objY + 130);
+                        if (currentDetections.length > 0) {
+                            ctxYolo.fillStyle = '#00f3ff';
+                            ctxYolo.font = '11px Share Tech Mono';
+                            ctxYolo.fillText("SUPRIMIENDO PREDICCIONES REDUNDANTES POR NMS...", 15, h - 20);
+                        }
                     } else {
-                        ctxYolo.fillStyle = '#8e9ca6';
-                        ctxYolo.font = '11px Share Tech Mono';
-                        ctxYolo.fillText("INFERIOR AL CONFIDENCE THRESHOLD", objX - 100, objY + 120);
+                        const isApple = activeInput === 'apple';
+                        const mainConf = isApple ? 0.98 : 0.95;
+                        const secConf = isApple ? 0.86 : 0.81;
+                        const label = isApple ? 'manzana' : 'maleza';
+                        const color = label === 'manzana' ? themeColors.verde : themeColors.rojo;
+
+                        const mainBox = { x1: objX - 85, y1: objY - 95, w: 170, h: 180 };
+                        if (mainConf >= confidenceThreshold) {
+                            ctxYolo.strokeStyle = color;
+                            ctxYolo.lineWidth = 2.5;
+                            ctxYolo.strokeRect(mainBox.x1, mainBox.y1, mainBox.w, mainBox.h);
+
+                            ctxYolo.fillStyle = color;
+                            ctxYolo.fillRect(mainBox.x1, mainBox.y1 - 18, 120, 18);
+                            ctxYolo.fillStyle = '#000000';
+                            ctxYolo.font = '700 10px Orbitron';
+                            ctxYolo.fillText(`${label.toUpperCase()} ${(mainConf * 100).toFixed(0)}%`, mainBox.x1 + 5, mainBox.y1 - 5);
+                        }
+
+                        const secBox = { x1: objX - 70, y1: objY - 80, w: 155, h: 165 };
+                        if (secConf >= confidenceThreshold) {
+                            ctxYolo.strokeStyle = `rgba(${label === 'manzana' ? '0,255,136' : '255,59,48'}, ${fade})`;
+                            ctxYolo.lineWidth = 1.5;
+                            ctxYolo.strokeRect(secBox.x1, secBox.y1, secBox.w, secBox.h);
+
+                            ctxYolo.fillStyle = `rgba(${label === 'manzana' ? '0,255,136' : '255,59,48'}, ${fade})`;
+                            ctxYolo.fillRect(secBox.x1, secBox.y1 - 18, 120, 18);
+                            ctxYolo.fillStyle = `rgba(0,0,0, ${fade})`;
+                            ctxYolo.font = '700 10px Orbitron';
+                            ctxYolo.fillText(`REDUNDANTE ${(secConf * 100).toFixed(0)}%`, secBox.x1 + 5, secBox.y1 - 5);
+
+                            ctxYolo.fillStyle = '#00f3ff';
+                            ctxYolo.font = '11px Share Tech Mono';
+                            ctxYolo.fillText(`IoU SOLAPE: 84% > 45% (UMBRAL)`, objX - 80, objY + 110);
+                            ctxYolo.fillText("ELIMINANDO CAJA REDUNDANTE POR NMS...", objX - 100, objY + 130);
+                        } else {
+                            ctxYolo.fillStyle = '#8e9ca6';
+                            ctxYolo.font = '11px Share Tech Mono';
+                            ctxYolo.fillText("INFERIOR AL CONFIDENCE THRESHOLD", objX - 100, objY + 120);
+                        }
                     }
                 }
             }
@@ -797,46 +1115,77 @@
             function updateNetworkState() {
                 if (layers.length === 0) return;
 
+                let hasCrop = false;
+                let hasWeed = false;
+                let maxCropConf = 0.0;
+                let maxWeedConf = 0.0;
+
+                if (activeInput === 'camera' && Array.isArray(currentDetections)) {
+                    currentDetections.forEach(det => {
+                        if (!det) return;
+                        const conf = det.confidence || 0;
+                        if (conf >= confidenceThreshold) {
+                            if (det.class === 'manzana') {
+                                hasCrop = true;
+                                if (conf > maxCropConf) maxCropConf = conf;
+                            } else {
+                                hasWeed = true;
+                                if (conf > maxWeedConf) maxWeedConf = conf;
+                            }
+                        }
+                    });
+                } else if (activeInput === 'apple') {
+                    hasCrop = true;
+                    maxCropConf = 0.98;
+                } else if (activeInput === 'banana') {
+                    hasWeed = true;
+                    maxWeedConf = 0.95;
+                }
+
+                // Capa de Entrada
                 layers[0].nodes.forEach(node => {
-                    if (activeInput === 'apple') {
-                        node.active = (node.id === 'in_red' || node.id === 'in_round');
-                        node.val = node.active ? 1.0 : 0.05;
+                    if (node.id === 'in_red' || node.id === 'in_round') {
+                        node.active = hasCrop;
+                        node.val = hasCrop ? maxCropConf : 0.05;
                     } else {
-                        node.active = (node.id === 'in_yellow' || node.id === 'in_elong');
-                        node.val = node.active ? 1.0 : 0.05;
+                        node.active = hasWeed;
+                        node.val = hasWeed ? maxWeedConf : 0.05;
                     }
                 });
 
+                // Capa Oculta 1
                 layers[1].nodes.forEach(node => {
-                    if (activeInput === 'apple') {
-                        node.active = (node.id === 'h1_edges' || node.id === 'h1_texture');
-                        node.val = node.id === 'h1_edges' ? 0.9 : (node.id === 'h1_texture' ? 0.85 : 0.15);
-                    } else {
-                        node.active = (node.id === 'h1_edges' || node.id === 'h1_stem');
-                        node.val = node.id === 'h1_edges' ? 0.85 : (node.id === 'h1_stem' ? 0.8 : 0.15);
+                    if (node.id === 'h1_edges') {
+                        node.active = hasCrop || hasWeed;
+                        node.val = (hasCrop || hasWeed) ? Math.max(maxCropConf, maxWeedConf) * 0.9 : 0.15;
+                    } else if (node.id === 'h1_texture') {
+                        node.active = hasCrop;
+                        node.val = hasCrop ? maxCropConf * 0.85 : 0.15;
+                    } else if (node.id === 'h1_stem') {
+                        node.active = hasWeed;
+                        node.val = hasWeed ? maxWeedConf * 0.8 : 0.15;
                     }
                 });
 
+                // Capa Oculta 2
                 layers[2].nodes.forEach(node => {
-                    if (activeInput === 'apple') {
-                        node.active = (node.id === 'h2_apple_shape');
-                        node.val = node.id === 'h2_apple_shape' ? 0.95 : 0.05;
+                    if (node.id === 'h2_apple_shape') {
+                        node.active = hasCrop;
+                        node.val = hasCrop ? maxCropConf * 0.95 : 0.05;
                     } else {
-                        node.active = (node.id === 'h2_banana_shape');
-                        node.val = node.id === 'h2_banana_shape' ? 0.92 : 0.05;
+                        node.active = hasWeed;
+                        node.val = hasWeed ? maxWeedConf * 0.92 : 0.05;
                     }
                 });
 
-                const isCropConfirmed = (activeInput === 'apple' && 0.98 >= confidenceThreshold);
-                const isWeedConfirmed = (activeInput === 'banana' && 0.95 >= confidenceThreshold);
-
+                // Capa de Salida
                 layers[3].nodes.forEach(node => {
                     if (node.id === 'out_crop') {
-                        node.active = isCropConfirmed;
-                        node.val = activeInput === 'apple' ? 0.98 : 0.02;
+                        node.active = hasCrop;
+                        node.val = hasCrop ? maxCropConf : 0.02;
                     } else {
-                        node.active = isWeedConfirmed;
-                        node.val = activeInput === 'banana' ? 0.95 : 0.03;
+                        node.active = hasWeed;
+                        node.val = hasWeed ? maxWeedConf : 0.03;
                     }
                 });
 
@@ -852,6 +1201,7 @@
                     if (node.active && Math.random() < 0.08) {
                         const activeOutConns = connections.filter(c => c.src.id === node.id && c.active);
                         activeOutConns.forEach(conn => {
+                            const isCropPath = node.id === 'in_red' || node.id === 'in_round';
                             networkParticles.push({
                                 x: conn.src.x,
                                 y: conn.src.y,
@@ -859,7 +1209,7 @@
                                 speed: 2.0 + Math.random() * 1.5,
                                 size: 2 + Math.random() * 2,
                                 progress: 0,
-                                color: activeInput === 'apple' ? themeColors.verde : '#ffcc00',
+                                color: isCropPath ? themeColors.verde : '#ffcc00',
                                 path: conn
                             });
                         });
@@ -999,19 +1349,265 @@
                         ctxNetwork.fillStyle = node.active ? nodeColor : '#4f5c64';
                         ctxNetwork.font = '9px Share Tech Mono';
                         ctxNetwork.fillText(node.val.toFixed(2), node.x, node.y + 24);
-
                         ctxNetwork.restore();
                     });
                 });
             }
 
             // 4. ENGINE 4: MAPAS DE CARACTERÍSTICAS
+            
+            // Canvas temporal oculto para procesar píxeles a resolución optimizada (alto rendimiento)
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+
+            function applyFeatureFilter(img, destCtx, dw, dh, type) {
+                if (!img || !img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) return;
+                
+                // Resoluciones optimizadas para procesar convolutions espaciales sin lag
+                const procW = 200;
+                const procH = 150;
+                tempCanvas.width = procW;
+                tempCanvas.height = procH;
+                
+                // Dibujar el frame original en el buffer temporal
+                try {
+                    tempCtx.drawImage(img, 0, 0, procW, procH);
+                } catch (e) {
+                    console.warn("[Explicador] Error en drawImage temporal:", e);
+                    return;
+                }
+                
+                // Los mapas profundos y heatmaps se renderizan mediante geometrías aceleradas
+                if (type === 'heatmap') {
+                    destCtx.save();
+                    destCtx.filter = 'grayscale(0.85) brightness(0.3)';
+                    try {
+                        destCtx.drawImage(img, 0, 0, dw, dh);
+                    } catch (e) {
+                        console.warn("[Explicador] Error drawImage en heatmap:", e);
+                    }
+                    destCtx.restore();
+                    
+                    // Superponer focos térmicos
+                    if (Array.isArray(currentDetections)) {
+                        currentDetections.forEach(det => {
+                            if (!det || !det.box || det.box.length < 4) return;
+                            const [x1, y1, x2, y2] = det.box;
+                            const cx = ((x1 + x2) / 2) * (dw / 640);
+                            const cy = ((y1 + y2) / 2) * (dh / 480);
+                            const rx = ((x2 - x1) / 2) * (dw / 640);
+                            const ry = ((y2 - y1) / 2) * (dh / 480);
+                            const r = Math.abs(Math.max(rx, ry) * 1.5);
+                            if (r <= 0) return;
+                            
+                            try {
+                                const grad = destCtx.createRadialGradient(cx, cy, 2, cx, cy, r);
+                                if (det.class === 'manzana') {
+                                    grad.addColorStop(0, 'rgba(0, 255, 136, 1)');
+                                    grad.addColorStop(0.3, 'rgba(0, 243, 255, 0.7)');
+                                    grad.addColorStop(0.6, 'rgba(0, 0, 255, 0.3)');
+                                    grad.addColorStop(1, 'rgba(0, 0, 255, 0)');
+                                } else {
+                                    grad.addColorStop(0, 'rgba(255, 59, 48, 1)');
+                                    grad.addColorStop(0.3, 'rgba(255, 204, 0, 0.7)');
+                                    grad.addColorStop(0.6, 'rgba(255, 100, 0, 0.3)');
+                                    grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+                                }
+                                destCtx.fillStyle = grad;
+                                destCtx.beginPath();
+                                destCtx.arc(cx, cy, r, 0, Math.PI * 2);
+                                destCtx.fill();
+                            } catch (e) {
+                                console.warn("[Explicador] Error creando degradado en heatmap:", e);
+                            }
+                        });
+                    }
+                    return;
+                }
+                
+                if (type === 'shape-circle' || type === 'shape-elong') {
+                    destCtx.save();
+                    try {
+                        destCtx.drawImage(img, 0, 0, dw, dh);
+                    } catch (e) {
+                        console.warn("[Explicador] Error drawImage en siluetas:", e);
+                    }
+                    
+                    const targetClass = type === 'shape-circle' ? 'manzana' : 'maleza';
+                    const glowColor = type === 'shape-circle' ? 'rgba(0, 255, 136, 0.25)' : 'rgba(255, 59, 48, 0.25)';
+                    const strokeColor = type === 'shape-circle' ? themeColors.verde : themeColors.rojo;
+                    
+                    if (Array.isArray(currentDetections)) {
+                        currentDetections.forEach(det => {
+                            if (!det || !det.box || det.box.length < 4 || det.class !== targetClass) return;
+                            const [x1, y1, x2, y2] = det.box;
+                            const sx = x1 * (dw / 640);
+                            const sy = y1 * (dh / 480);
+                            const sw = (x2 - x1) * (dw / 640);
+                            const sh = (y2 - y1) * (dw / 640);
+                            
+                            destCtx.shadowColor = strokeColor;
+                            destCtx.shadowBlur = 15;
+                            destCtx.strokeStyle = strokeColor;
+                            destCtx.lineWidth = 2.5;
+                            
+                            if (type === 'shape-circle') {
+                                const cx = sx + sw / 2;
+                                const cy = sy + sh / 2;
+                                const r = Math.abs(Math.min(sw, sh) / 2);
+                                if (r > 0) {
+                                    destCtx.beginPath();
+                                    destCtx.arc(cx, cy, r, 0, Math.PI * 2);
+                                    destCtx.stroke();
+                                    destCtx.fillStyle = glowColor;
+                                    destCtx.fill();
+                                }
+                            } else {
+                                const cx = sx + sw / 2;
+                                const cy = sy + sh / 2;
+                                const rx = Math.abs(sw / 2);
+                                const ry = Math.abs(sh / 2);
+                                if (rx > 0 && ry > 0) {
+                                    destCtx.beginPath();
+                                    destCtx.ellipse(cx, cy, rx, ry, Math.PI / 4, 0, Math.PI * 2);
+                                    destCtx.stroke();
+                                    destCtx.fillStyle = glowColor;
+                                    destCtx.fill();
+                                }
+                            }
+                        });
+                    }
+                    destCtx.restore();
+                    return;
+                }
+                
+                // Convoluciones espaciales y filtros cromáticos (procesado de píxeles)
+                const imgData = tempCtx.getImageData(0, 0, procW, procH);
+                const data = imgData.data;
+                const len = data.length;
+                
+                if (type === 'sobel-v' || type === 'sobel-h' || type === 'diagonal' || type === 'laplacian' || type === 'texture') {
+                    const output = tempCtx.createImageData(procW, procH);
+                    const dst = output.data;
+                    
+                    // Copiar canal alfa
+                    for (let i = 3; i < len; i += 4) dst[i] = 255;
+                    
+                    let kernel;
+                    let factor = 1.0;
+                    let bias = 0;
+                    
+                    if (type === 'sobel-v') {
+                        kernel = [
+                            -1, 0, 1,
+                            -2, 0, 2,
+                            -1, 0, 1
+                        ];
+                    } else if (type === 'sobel-h') {
+                        kernel = [
+                            -1, -2, -1,
+                             0,  0,  0,
+                             1,  2,  1
+                        ];
+                    } else if (type === 'diagonal') {
+                        kernel = [
+                            -2, -1,  0,
+                            -1,  0,  1,
+                             0,  1,  2
+                        ];
+                    } else if (type === 'laplacian') {
+                        kernel = [
+                             0, -1,  0,
+                            -1,  4, -1,
+                             0, -1,  0
+                        ];
+                    } else if (type === 'texture') {
+                        kernel = [
+                            -1, -1, -1,
+                            -1,  9, -1,
+                            -1, -1, -1
+                        ];
+                        factor = 0.4;
+                        bias = 25;
+                    }
+                    
+                    for (let y = 1; y < procH - 1; y++) {
+                        for (let x = 1; x < procW - 1; x++) {
+                            let rSum = 0;
+                            let gSum = 0;
+                            let bSum = 0;
+                            
+                            for (let ky = -1; ky <= 1; ky++) {
+                                for (let kx = -1; kx <= 1; kx++) {
+                                    const idx = ((y + ky) * procW + (x + kx)) * 4;
+                                    const kVal = kernel[(ky + 1) * 3 + (kx + 1)];
+                                    rSum += data[idx] * kVal;
+                                    gSum += data[idx + 1] * kVal;
+                                    bSum += data[idx + 2] * kVal;
+                                }
+                            }
+                            
+                            const idx = (y * procW + x) * 4;
+                            
+                            if (type === 'texture') {
+                                const val = (rSum + gSum + bSum) / 3 * factor + bias;
+                                const clamped = Math.max(0, Math.min(255, val));
+                                dst[idx] = clamped * 0.3;
+                                dst[idx + 1] = clamped * 0.7; // Tono verde azulado táctico
+                                dst[idx + 2] = clamped * 0.55;
+                            } else {
+                                const magnitude = Math.sqrt(rSum * rSum + gSum * gSum + bSum * bSum) * factor;
+                                const val = Math.min(255, magnitude * 1.5);
+                                dst[idx] = 0;
+                                dst[idx + 1] = val; // Verde neón
+                                dst[idx + 2] = val * 0.53;
+                            }
+                        }
+                    }
+                    tempCtx.putImageData(output, 0, 0);
+                }
+                else if (type === 'color-red' || type === 'color-greenyellow') {
+                    for (let i = 0; i < len; i += 4) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+                        const sum = r + g + b + 1;
+                        const rRatio = r / sum;
+                        const gRatio = g / sum;
+                        
+                        let match = false;
+                        if (type === 'color-red') {
+                            match = rRatio > 0.44 && r > 70 && g < 120 && b < 120;
+                        } else {
+                            match = gRatio > 0.38 && g > 70 && b < 140;
+                        }
+                        
+                        if (match) {
+                            data[i] = Math.min(255, r * 1.3);
+                            data[i + 1] = Math.min(255, g * 1.3);
+                            data[i + 2] = Math.min(255, b * 1.3);
+                        } else {
+                            const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                            data[i] = gray * 0.12; // Oscurecer el fondo no coincidente
+                            data[i + 1] = gray * 0.12;
+                            data[i + 2] = gray * 0.12;
+                        }
+                    }
+                    tempCtx.putImageData(imgData, 0, 0);
+                }
+                
+                destCtx.imageSmoothingEnabled = false;
+                destCtx.drawImage(tempCanvas, 0, 0, dw, dh);
+                destCtx.imageSmoothingEnabled = true;
+            }
+
             function renderFeatureMaps() {
                 if (activeTab !== 'tab-feature-maps') return;
 
-                drawMiniFeatureMap(canvasFmapEdge, 'edge');
-                drawMiniFeatureMap(canvasFmapColor, 'color');
-                drawMiniFeatureMap(canvasFmapHeatmap, 'heatmap');
+                // Dibujar todas las vistas en miniatura en tiempo real
+                for (const [key, ctx] of Object.entries(fmapContexts)) {
+                    drawMiniFeatureMap(fmapCanvases[key], key);
+                }
 
                 const w = canvasFeatureZoom.width;
                 const h = canvasFeatureZoom.height;
@@ -1020,9 +1616,24 @@
                 ctxFeatureZoom.fillStyle = '#000000';
                 ctxFeatureZoom.fillRect(0, 0, w, h);
 
-                drawFeatureFilter(ctxFeatureZoom, w/2, h/2, 120, activeFeatureMap);
+                if (activeInput === 'camera') {
+                    if (currentCameraFrame && currentCameraFrame.complete && currentCameraFrame.naturalWidth > 0) {
+                        applyFeatureFilter(currentCameraFrame, ctxFeatureZoom, w, h, activeFeatureMap);
+                    } else {
+                        ctxFeatureZoom.fillStyle = '#070908';
+                        ctxFeatureZoom.fillRect(0, 0, w, h);
+                        ctxFeatureZoom.fillStyle = '#A2AAAD';
+                        ctxFeatureZoom.font = '14px Share Tech Mono';
+                        ctxFeatureZoom.textAlign = 'center';
+                        ctxFeatureZoom.fillText("ESPERANDO SEÑAL DE CÁMARA...", w / 2, h / 2);
+                        ctxFeatureZoom.textAlign = 'left';
+                    }
+                } else {
+                    drawFeatureFilter(ctxFeatureZoom, w / 2, h / 2, 120, activeFeatureMap);
+                }
 
-                ctxFeatureZoom.strokeStyle = 'rgba(0, 243, 255, 0.05)';
+                // Cuadrícula táctica overlay
+                ctxFeatureZoom.strokeStyle = 'rgba(0, 243, 255, 0.04)';
                 ctxFeatureZoom.lineWidth = 1;
                 for (let x = 0; x < w; x += 30) {
                     ctxFeatureZoom.beginPath();
@@ -1038,61 +1649,156 @@
                 ctxFeatureZoom.fillStyle = '#00f3ff';
                 ctxFeatureZoom.font = '10px Share Tech Mono';
                 ctxFeatureZoom.fillText(`FILTRO ACTIVO: [${activeFeatureMap.toUpperCase()}]`, 15, 25);
-                ctxFeatureZoom.fillText("SENSADO DUPLEX DE TEXTURA", 15, h - 15);
+                
+                let filterDesc = "SENSADO MULTICAPA Deep Learning";
+                if (activeFeatureMap.startsWith('sobel-')) filterDesc = "EXTRACTOR DE CONTORNOS LINEALES DE CAPA TEMPRANA";
+                else if (activeFeatureMap === 'diagonal') filterDesc = "DETECTOR DE ORIENTACIÓN OBLICUA DE CAPA TEMPRANA";
+                else if (activeFeatureMap === 'laplacian') filterDesc = "FILTRO DE ESQUINAS Y CAMBIOS DE PÍXEL DE CAPA TEMPRANA";
+                else if (activeFeatureMap === 'color-red') filterDesc = "FILTRO SELECTIVO CROMÁTICO ROJO DE CAPA INTERMEDIA";
+                else if (activeFeatureMap === 'color-greenyellow') filterDesc = "FILTRO SELECTIVO CROMÁTICO AMARILLO/VERDE DE CAPA INTERMEDIA";
+                else if (activeFeatureMap === 'texture') filterDesc = "EXTRACTOR DE PASO ALTO DE TEXTURAS DE CAPA INTERMEDIA";
+                else if (activeFeatureMap === 'shape-circle') filterDesc = "DETECTOR DE PATRONES DE SILUETAS CIRCULARES DE CAPA PROFUNDA";
+                else if (activeFeatureMap === 'shape-elong') filterDesc = "DETECTOR DE PATRONES DE SILUETAS ALARGADAS DE CAPA PROFUNDA";
+                else if (activeFeatureMap === 'heatmap') filterDesc = "MAPA DE ATENCIÓN DE INFERENCIA GRAD-CAM (CAPA DE SALIDA)";
+
+                ctxFeatureZoom.fillText(filterDesc, 15, h - 15);
             }
 
             function drawMiniFeatureMap(canvas, type) {
+                if (!canvas) return;
                 const ctx = canvas.getContext('2d');
+                if (!ctx) return;
                 const w = canvas.width;
                 const h = canvas.height;
                 ctx.clearRect(0, 0, w, h);
                 
-                ctx.fillStyle = '#00';
-                ctx.fillRect(0, 0, w, h);
-
-                drawFeatureFilter(ctx, w/2, h/2, 30, type);
+                if (activeInput === 'camera') {
+                    if (currentCameraFrame && currentCameraFrame.complete && currentCameraFrame.naturalWidth > 0) {
+                        applyFeatureFilter(currentCameraFrame, ctx, w, h, type);
+                    } else {
+                        ctx.fillStyle = '#000000';
+                        ctx.fillRect(0, 0, w, h);
+                        ctx.fillStyle = '#8e9ca6';
+                        ctx.font = '8px Orbitron';
+                        ctx.textAlign = 'center';
+                        ctx.fillText("SIN SEÑAL", w / 2, h / 2);
+                    }
+                } else {
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, w, h);
+                    drawFeatureFilter(ctx, w / 2, h / 2, 30, type);
+                }
             }
 
             function drawFeatureFilter(ctx, x, y, r, type) {
                 ctx.save();
+                const isApple = activeInput === 'apple';
 
-                if (type === 'edge') {
-                    ctx.shadowColor = '#00ff88';
-                    ctx.shadowBlur = 4;
-                    if (activeInput === 'apple') {
+                if (type === 'sobel-v' || type === 'sobel-h' || type === 'diagonal' || type === 'laplacian') {
+                    ctx.shadowColor = '#00f3ff';
+                    ctx.shadowBlur = 6;
+                    ctx.strokeStyle = '#00f3ff';
+                    ctx.lineWidth = type === 'laplacian' ? 1.0 : 1.5;
+                    
+                    if (isApple) {
                         drawApple(ctx, x, y, r, true);
                     } else {
                         drawBanana(ctx, x, y, r, true);
                     }
                 }
-                else if (type === 'color') {
-                    if (activeInput === 'apple') {
-                        ctx.fillStyle = 'rgba(255, 59, 48, 0.2)';
+                else if (type === 'color-red') {
+                    if (isApple) {
+                        ctx.fillStyle = 'rgba(255, 59, 48, 0.25)';
                         ctx.strokeStyle = '#ff3b30';
                         ctx.lineWidth = 2;
                         ctx.beginPath();
-                        ctx.arc(x - r*0.28, y, r*0.75, 0, Math.PI*2);
-                        ctx.arc(x + r*0.28, y, r*0.75, 0, Math.PI*2);
+                        ctx.arc(x - r * 0.28, y, r * 0.75, 0, Math.PI * 2);
+                        ctx.arc(x + r * 0.28, y, r * 0.75, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.stroke();
                     } else {
-                        ctx.fillStyle = 'rgba(255, 204, 0, 0.2)';
+                        ctx.fillStyle = 'rgba(50, 50, 50, 0.3)';
+                        ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)';
+                        ctx.lineWidth = 1;
+                        drawBanana(ctx, x, y, r, true);
+                    }
+                }
+                else if (type === 'color-greenyellow') {
+                    if (!isApple) {
+                        ctx.fillStyle = 'rgba(255, 204, 0, 0.25)';
                         ctx.strokeStyle = '#ffcc00';
                         ctx.lineWidth = 2;
                         ctx.beginPath();
-                        ctx.arc(x - r*0.5, y - r*0.5, r*1.3, -Math.PI/6, Math.PI*0.63, false);
-                        ctx.arc(x - r*0.3, y - r*0.3, r*1.08, Math.PI*0.60, -Math.PI/8, true);
+                        ctx.arc(x - r * 0.5, y - r * 0.5, r * 1.3, -Math.PI / 6, Math.PI * 0.63, false);
+                        ctx.arc(x - r * 0.3, y - r * 0.3, r * 1.08, Math.PI * 0.60, -Math.PI / 8, true);
                         ctx.closePath();
                         ctx.fill();
                         ctx.stroke();
+                    } else {
+                        ctx.fillStyle = 'rgba(50, 50, 50, 0.3)';
+                        ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)';
+                        ctx.lineWidth = 1;
+                        drawApple(ctx, x, y, r, true);
+                    }
+                }
+                else if (type === 'texture') {
+                    ctx.strokeStyle = 'rgba(35, 156, 66, 0.6)';
+                    ctx.lineWidth = 1.5;
+                    if (isApple) {
+                        drawApple(ctx, x, y, r, true);
+                    } else {
+                        drawBanana(ctx, x, y, r, true);
+                    }
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+                    ctx.fillRect(x - r, y - r, r * 2, r * 2);
+                }
+                else if (type === 'shape-circle') {
+                    if (isApple) {
+                        ctx.shadowColor = '#00ff88';
+                        ctx.shadowBlur = 10;
+                        ctx.fillStyle = 'rgba(0, 255, 136, 0.2)';
+                        ctx.strokeStyle = '#00ff88';
+                        ctx.lineWidth = 2.5;
+                        ctx.beginPath();
+                        ctx.arc(x, y, r * 0.9, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = 'rgba(50, 50, 50, 0.1)';
+                        ctx.strokeStyle = 'rgba(100, 100, 100, 0.2)';
+                        drawBanana(ctx, x, y, r, true);
+                    }
+                }
+                else if (type === 'shape-elong') {
+                    if (!isApple) {
+                        ctx.shadowColor = '#ff3b30';
+                        ctx.shadowBlur = 10;
+                        ctx.fillStyle = 'rgba(255, 59, 48, 0.2)';
+                        ctx.strokeStyle = '#ff3b30';
+                        ctx.lineWidth = 2.5;
+                        ctx.beginPath();
+                        ctx.ellipse(x, y, r * 1.1, r * 0.6, Math.PI / 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = 'rgba(50, 50, 50, 0.1)';
+                        ctx.strokeStyle = 'rgba(100, 100, 100, 0.2)';
+                        drawApple(ctx, x, y, r, true);
                     }
                 }
                 else if (type === 'heatmap') {
                     const grad = ctx.createRadialGradient(x, y, 2, x, y, r * 1.2);
-                    grad.addColorStop(0, 'rgba(255, 59, 48, 1)');
-                    grad.addColorStop(0.3, 'rgba(255, 204, 0, 0.85)');
-                    grad.addColorStop(0.6, 'rgba(0, 255, 136, 0.4)');
-                    grad.addColorStop(1, 'rgba(0, 0, 255, 0)');
+                    if (isApple) {
+                        grad.addColorStop(0, 'rgba(0, 255, 136, 1)');
+                        grad.addColorStop(0.3, 'rgba(0, 243, 255, 0.85)');
+                        grad.addColorStop(0.6, 'rgba(0, 0, 255, 0.4)');
+                        grad.addColorStop(1, 'rgba(0, 0, 255, 0)');
+                    } else {
+                        grad.addColorStop(0, 'rgba(255, 59, 48, 1)');
+                        grad.addColorStop(0.3, 'rgba(255, 204, 0, 0.85)');
+                        grad.addColorStop(0.6, 'rgba(255, 100, 0, 0.4)');
+                        grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+                    }
                     
                     ctx.fillStyle = grad;
                     ctx.beginPath();
@@ -1101,7 +1807,7 @@
 
                     ctx.strokeStyle = 'rgba(255,255,255,0.08)';
                     ctx.lineWidth = 1;
-                    if (activeInput === 'apple') {
+                    if (isApple) {
                         drawApple(ctx, x, y, r, true);
                     } else {
                         drawBanana(ctx, x, y, r, true);

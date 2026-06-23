@@ -1107,6 +1107,25 @@ body.theme-inia .inst-tag.csic {
     display: grid;
     grid-template-columns: 1fr;
     gap: 15px;
+    overflow-y: auto;
+    max-height: 480px;
+    padding-right: 8px;
+}
+
+.feature-cards-container::-webkit-scrollbar {
+    width: 6px;
+}
+.feature-cards-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+.feature-cards-container::-webkit-scrollbar-thumb {
+    background: var(--color-primary-alpha-20);
+    border: 1px solid var(--color-panel-border);
+    border-radius: 3px;
+}
+.feature-cards-container::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary);
 }
 
 .feature-map-card {

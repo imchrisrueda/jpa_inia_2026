@@ -108,3 +108,19 @@
   * Script de Manim sintácticamente correcto para compilar vídeos explicativos de la red neuronal.
 * **Pruebas**: Navegación manual por las pestañas, ajuste del slider y selección de cultivos/malezas.
 * **Estado**: COMPLETADO
+
+---
+
+## Tarea 7: Visualización de Feature Maps en Tiempo Real con la Cámara y Filtros
+* **Resultado parcial**: El explicador de IA procesa la señal de la cámara web en tiempo real aplicando 10 filtros didácticos diferentes (Bordes, Colores, Textura, Siluetas y Heatmap).
+* **Archivos previstos**:
+  * `static/simulation.html` (Integración de la cámara web, WebSocket y 10 filtros Canvas en JS)
+  * `static/style.css` (Barra de scroll futurista para las tarjetas de capas)
+  * `tasks.md`
+  * `CHANGELOG.md`
+* **Criterios de aceptación**:
+  * Visualización fluida a >30 FPS de los 10 filtros en miniatura y zoom central.
+  * Activación reactiva del flujo de red neuronal basado en detecciones de cámara en vivo.
+  * Funcionamiento correcto de NMS y Grid cells sobre el stream de la cámara.
+* **Estado**: COMPLETADO
+
